@@ -1,4 +1,6 @@
-load_libraries:- use_module(library(lists)).
+load_lib:- use_module(library(lists)).
+
+
 
 readCoords(X,Y):- write('X= '), read(XX),
 				  ((XX > 10 ; XX < 1) -> X = 1; X = XX),
