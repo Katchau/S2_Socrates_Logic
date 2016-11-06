@@ -69,7 +69,10 @@ traduz(v) :- write('  ').
 traduz(o) :- put_code(11044). %write(' O').
 traduz(x) :- put_code(11093). %write(' X').
 
-
+check_ortho_aux(Board, X, Y, Peca):- select_piece(Board, X, Y, Other), Other \== Peca.
+check_ortho_adjacency(Board, X, Y):- select_piece(Board, X, Y, Peca), Peca \== v, !, X1 is X + 1, X2 is X-1, Y1 is Y +1, Y2 is Y-1,
+									 check_ortho_aux(Board, X1, Y, Peca), !, check_ortho_aux(Board, X, Y1, Peca), !,
+									 check_ortho_aux(Board, X2, Y, Peca), !, check_ortho_aux(Board, X, Y2, Peca), !.
 
 select_piece_aux(X, X1, [L | Ls], Peca):- (X == X1, Peca = L , !) ; (X2 is X1 + 1, select_piece_aux(X, X2, Ls, Peca)).
 select_piece_aux(X, Y, Y1, [L | Ls], Peca):- (Y == Y1 , !,  select_piece_aux(X, 1,L , Peca) ); (Y2 is Y1 + 1 , select_piece_aux(X, Y, Y2, Ls, Peca)). 
