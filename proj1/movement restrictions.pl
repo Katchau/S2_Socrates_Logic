@@ -1,6 +1,6 @@
 :- include('usefull prepositions.pl').
 
-check_ortho_aux(Board, X, Y, Peca):- X == 0; Y == 0; Y == 11; X == 1 .
+check_ortho_aux(Board, X, Y, Peca):- X == 0; Y == 0; Y == 11; X == 11 .
 check_ortho_aux(Board, X, Y, Peca):- select_piece(Board, X, Y, Other), Other \== Peca.
 check_ortho_adjacency(Board, X, Y):- select_piece(Board, X, Y, Peca), Peca \== v, !, X1 is X + 1, X2 is X-1, Y1 is Y +1, Y2 is Y-1,
 									 check_ortho_aux(Board, X1, Y, Peca), !, check_ortho_aux(Board, X, Y1, Peca), !,
