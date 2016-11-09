@@ -56,7 +56,7 @@ display_initial_line():- write('   1   2    3   4    5   6   7    8   9   10 ').
 display_number_line(N) :- write(' '), write(N).
 display_division() :-    write('  -------------------------------------------').
 
-display_board_aux([], N) :- display_division().
+display_board_aux([], _) :- display_division().
 display_board_aux([L1 | Ls] , N) :- N1 is N+1,  display_division(), nl, display_line(L1),
 								  display_number_line(N1), nl, display_board_aux(Ls, N1).
 display_board([L1 | Ls]) :- display_initial_line(), nl, display_board_aux([L1 | Ls], 0).
