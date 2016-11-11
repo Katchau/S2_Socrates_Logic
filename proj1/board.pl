@@ -66,15 +66,15 @@ display_line([E1 | Es]) :-  write(' | '), traduz(E1),  display_line(Es).
 
 
 traduz(v) :- write(' ').
-traduz(o) :- write('O'). %put_code(11044). 
+traduz(o) :- write('O'). %put_code(11044).
 traduz(x) :- write('X').%put_code(11093).
 traduz(i) :- write('LOL').
 
 select_piece_aux(X, X1, [L | Ls], Peca):- (X == X1, Peca = L , !) ; (X2 is X1 + 1, select_piece_aux(X, X2, Ls, Peca)).
-select_piece_aux(X, Y, Y1, [L | Ls], Peca):- (Y == Y1 , !,  select_piece_aux(X, 1,L , Peca) ); (Y2 is Y1 + 1 , select_piece_aux(X, Y, Y2, Ls, Peca)). 
-select_piece([L | Ls],X , Y, Peca):- X =< 10, X >= 1, Y =< 10, X >= 1, select_piece_aux(X, Y, 1, [L | Ls], Peca).
+select_piece_aux(X, Y, Y1, [L | Ls], Peca):- (Y == Y1 , !,  select_piece_aux(X, 1,L , Peca) ); (Y2 is Y1 + 1 , select_piece_aux(X, Y, Y2, Ls, Peca)).
+select_piece([L | Ls],X , Y, Peca):- X =< 10, X >= 1, Y =< 10, Y >= 1, select_piece_aux(X, Y, 1, [L | Ls], Peca).
 
 check_piece_existence(Piece, [X | Xs]):- member(Piece, X) ; check_piece_existence(Piece, Xs).
 win_message(Player):- write("Player "), write(Player), write(" WINS!!<3").
-game_over(Piece, Board, Player):- Piece == x, not(check_piece_existence(o, Board)), win_message(Player).
-game_over(Piece, Board, Player):- Piece == o, not(check_piece_existence(x, Board)), win_message(Player).
+game_over(Piece, Board, Player):- Piece == x, not(check_piece_existence(o, Board)), display_board(Board), nl, win_message(Player).
+game_over(Piece, Board, Player):- Piece == o, not(check_piece_existence(x, Board)), display_board(Board), nl, win_message(Player).
