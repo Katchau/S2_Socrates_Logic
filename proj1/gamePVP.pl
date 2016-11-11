@@ -5,7 +5,7 @@ verifyPlayerPiece(Pnum, Piece):- Piece == 'x', Pnum == 0; Piece == 'o', Pnum == 
 checkRightPiece(Board, X, Y, Pnum, Piece):- select_piece(Board, X, Y, Piece),
                                             verifyPlayerPiece(Pnum, Piece).
 
-initGamePVP():- load_lib, final_board(Board),
+initGamePVP():- load_lib, board(Board),
                 playGamePVPinit(Board).
 
 playGamePVPinit(Board):- N is 0,
@@ -25,6 +25,7 @@ playGamePVP(N, Board):- N1 is N+1,
                             ),
                             write('Enter the coordinates of the destinantion of the piece:'), nl,
                             readCoords(Xf,Yf),
+							validate_destination(X, Y, Xf, Yf),
                             (
                                 jump(Board, NewBoard, Piece, X, Y, Xf, Yf);
                                 (
