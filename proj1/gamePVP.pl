@@ -5,7 +5,7 @@ verifyPlayerPiece(Pnum, Piece):- Piece == 'x', Pnum == 0; Piece == 'o', Pnum == 
 checkRightPiece(Board, X, Y, Pnum, Piece):- select_piece(Board, X, Y, Piece),
                                             verifyPlayerPiece(Pnum, Piece).
 
-initGamePVP():- load_lib, board(Board),
+initGamePVP():- load_lib, final_board(Board),
                 playGamePVPinit(Board).
 
 playGamePVPinit(Board):- N is 0,
@@ -26,14 +26,16 @@ playGamePVP(N, Board):- N1 is N+1,
                             write('Enter the coordinates of the destinantion of the piece:'), nl,
                             readCoords(Xf,Yf),
                             (
-                                jump(Board, Piece, X, Y, Xf, Yf);
+                                jump(Board, NewBoard, Piece, X, Y, Xf, Yf);
                                 (
                                     check_restriction(Board, X, Y, Xf, Yf),
                                     (
-                                        check_center_move(10, X, Y, Xf, Yf)
-                                        %replace_element_board(Board, NewBoard, X, Y, Xf, Yf, 0, Peca)
+										
+                                       ( check_center_move(10, X, Y, Xf, Yf); check_mov_adjoining(Board, Xf, Yf) ),
+                                        move_piece(Board, NewBoard, X, Y, Xf, Yf, Piece) 
                                     )
                                 )
                             )
                         ),
-                        playGamePVP(N1, newBoard).
+						(game_over(Piece, NewBoard, Pnum) ;
+                        playGamePVP(N1, NewBoard) ).

@@ -15,7 +15,7 @@ check_ortho_adv_adjacency(Peca, Board, X, Y):- select_piece(Board, X, Y, Peca), 
 									    									(
                                          check_ortho_adv_aux(Board, X1, Y, Peca), !;
                                          check_ortho_adv_aux(Board, X, Y1, Peca), !;
-									     						 			 check_ortho_adv_aux(Board, X2, Y, Peca), !;
+									     check_ortho_adv_aux(Board, X2, Y, Peca), !;
                                          check_ortho_adv_aux(Board, X, Y2, Peca), !
                                         ).
 
@@ -38,10 +38,12 @@ check_center_move(Board_size, X0, Y0, X ,Y):- X0 =< Board_size / 2, Y0 > Board_s
 check_center_move(Board_size, X0, Y0, X ,Y):- X0 > Board_size / 2, Y0 > Board_size / 2, !, check_center_move(X0, Y0, X, Y, -1, -1) .
 check_center_move(Board_size, X0, Y0, X ,Y):- X0 =< Board_size / 2, Y0 =< Board_size / 2, !, check_center_move(X0, Y0, X, Y, 1, 1) .
 
-%check_mov_adjoining(Board, X, Y):- check_ortho_adv_adjacency_dest(Peca, Board, X, Y).
+check_mov_adjoining(Board, X, Y):- check_ortho_adv_adjacency_dest( _, Board, X, Y).
 
-jump_aux(_, _, X, Y):- check_outOfBounds(X , Y).
-jump_aux(Board, Peca, X, Y):- select_piece(Board, X, Y, Vazio), Vazio == v, replace_element_board(Board, Test, X, Y, 1, Peca),  !, check_ortho_adjacency(Test, X, Y).
-jump_aux(Board, Peca, X0, Y0, X, Y):- X \== X0, Y0 == Y, X_F is X + (X-X0), !, jump_aux(Board, Peca, X_F, Y).
-jump_aux(Board, Peca, X0, Y0, X, Y):- Y \== Y0, X0 == X, Y_F is Y + (Y-Y0), !, jump_aux(Board, Peca, X, Y_F).
-jump(Board, Player, X0, Y0, X, Y):- select_piece(Board, X, Y, Peca), Peca \== Player, Peca \== v, !, jump_aux(Board, Player, X0, Y0, X, Y).
+jump_aux(NewBoard, NewBoard, _, X, Y):- check_outOfBounds(X , Y), !.
+jump_aux(Board, NewBoard, Peca, X, Y):- select_piece(Board, X, Y, Vazio), Vazio == v, replace_element(Board, NewBoard, X, Y, Peca),  !, check_ortho_adjacency(NewBoard, X, Y).
+jump_aux(Board, NewBoard, Peca, X0, Y0, X, Y):- X \== X0, Y0 == Y, X_F is X + (X-X0), !, 
+											  clean_two_elements(Board, BoardInter, X0, Y0, X ,Y), jump_aux(BoardInter, NewBoard, Peca, X_F, Y).
+jump_aux(Board, NewBoard, Peca, X0, Y0, X, Y):- Y \== Y0, X0 == X, Y_F is Y + (Y-Y0), !,
+											  clean_two_elements(Board, BoardInter, X0, Y0, X, Y), jump_aux(BoardInter, NewBoard, Peca, X, Y_F).
+jump(Board, NewBoard, Player, X0, Y0, X, Y):- select_piece(Board, X, Y, Peca), Peca \== Player, Peca \== v, !, jump_aux(Board, NewBoard, Player, X0, Y0, X, Y).

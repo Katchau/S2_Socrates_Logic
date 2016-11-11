@@ -14,3 +14,8 @@ replace_element_list([H | L1], [H | L2], X, X1, Peca):- X \== X1 , X2 is X1 + 1,
 replace_element_board([],[], _, _, _, _).
 replace_element_board([L | Ls], [L1 | Ls1], X, Y, Y1, Peca):- Y == Y1, Y2 is Y1 + 2, replace_element_list(L,L1,X,1,Peca), !, replace_element_board(Ls, Ls1, X, Y, Y2, Peca).
 replace_element_board([L | Ls], [L | Ls1], X, Y, Y1, Peca):- Y \== Y1, Y2 is Y1 + 1, replace_element_board(Ls, Ls1, X, Y, Y2, Peca) ,!.
+
+replace_element(Board, NewBoard, X, Y, Peca):- replace_element_board(Board, NewBoard, X, Y, 1, Peca).
+
+clean_two_elements(Board, NewBoard, X0, Y0, X, Y):- replace_element(Board, Inter, X0, Y0, v), replace_element(Inter, NewBoard, X, Y, v).
+move_piece(Board, NewBoard, X0, Y0, X, Y, Peca):- replace_element(Board, Inter, X0, Y0, v), replace_element(Inter, NewBoard, X, Y, Peca).
