@@ -18,7 +18,7 @@ verifyPossiblePlay_aux2(Board, Piece, Pnum, X, Y, Xf, Yf):- validate_destination
                                                                (
                                                                    check_restriction(Board, X, Y, Xf, Yf),
                                                                    (
-                                                                      check_center_move(10, X, Y, Xf, Yf);
+                                                                      length(Board, Boardsize), check_center_move(Boardsize, X, Y, Xf, Yf);
                                                                       check_mov_adjoining(Board, Xf, Yf)
                                                                    )
                                                                )
@@ -38,24 +38,25 @@ checkRightPiece(Board, X, Y, Pnum, Piece):- select_piece(Board, X, Y, Piece),
                                             verifyPlayerPiece(Pnum, Piece).
 
 											
-first_read(Board, Piece, X, Y, Num):- repeat,
+first_read(Board, Boardsize, Piece, X, Y, Num):- repeat,
 									  (
 										  write('Enter the coordinates of the piece:'), nl,
-										  readCoords(X,Y),
+										  readCoords(X,Y, Boardsize),
 										  checkRightPiece(Board, X, Y, Num, Piece)
 									  ).
 
-destination_read(X, Y, Xf, Yf):- repeat,
+destination_read(Boardsize, X, Y, Xf, Yf):- repeat,
 								  (
 								  	 write('Enter the coordinates of the destinantion of the piece:'), nl,
-								  	 readCoords(Xf,Yf),
+								  	 readCoords(Xf,Yf, Boardsize),
 								  	 validate_destination(X, Y, Xf, Yf)
 								  ).
 								  
 player_play(Board, NewBoard, Num, Piece):-  repeat,
 											(
-												 first_read(Board, Piece, X, Y, Num),
-												 destination_read(X, Y, Xf, Yf),
+												 length(Board, Boardsize), 
+												 first_read(Board, Boardsize, Piece, X, Y, Num),
+												 destination_read(Boardsize, X, Y, Xf, Yf),
 												 (
 													 jump_cycle(Board, NewBoard, Piece, X, Y, Xf, Yf);
 													 (
@@ -63,7 +64,7 @@ player_play(Board, NewBoard, Num, Piece):-  repeat,
 														 check_restriction(Board, X, Y, Xf, Yf), 
 														 (
 															 (
-																 check_center_move(10, X, Y, Xf, Yf);
+																 check_center_move(Boardsize, X, Y, Xf, Yf);
 																 check_mov_adjoining(Board, Xf, Yf)
 															 ),
 															 move_piece(Board, NewBoard, X, Y, Xf, Yf, Piece)

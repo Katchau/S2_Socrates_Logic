@@ -2,10 +2,10 @@ load_lib:- use_module(library(lists)), use_module(library(random)).
 
 get_vector(X0, Y0, X , Y, Xf, Yf):- Xf is X - X0, Yf is Y - Y0 .
 
-validate_coord(X):- X =< 10 , X >= 1 .
+validate_coord(X, Boardsize):- X =< Boardsize , X >= 1 .
 
-readCoords(X,Y):- write('X= '), read(X), validate_coord(X), 
-				  write('Y= '), read(Y), validate_coord(Y).
+readCoords(X,Y, Boardsize):- write('X= '), read(X), validate_coord(X, Boardsize), 
+							 write('Y= '), read(Y), validate_coord(Y, Boardsize).
 				  
 
 check_destinationCoords(X, Xf):- X == Xf.
@@ -31,9 +31,9 @@ replace_element(Board, NewBoard, X, Y, Peca):- replace_element_board(Board, NewB
 clean_two_elements(Board, NewBoard, X0, Y0, X, Y):- replace_element(Board, Inter, X0, Y0, v), replace_element(Inter, NewBoard, X, Y, v).
 move_piece(Board, NewBoard, X0, Y0, X, Y, Peca):- replace_element(Board, Inter, X0, Y0, v), replace_element(Inter, NewBoard, X, Y, Peca).
 
-random_element_list(L, Element, X):- length(L, Length), random(0, Length, Index), nth0(Index, List, Element).
+random_element_list(L, Element):- length(L, Length), random(0, Length, Index), nth0(Index, L, Element).
 
 random_element([_ | Ls], Element, Y, Y1):- Y \== Y1, Y2 is Y1 + 1, random_element(Ls, Element, Y, Y2).
-random_element([L | _], Element, Y, Y1):- Y == Y1, random_element_list(L, Element, X).
+random_element([L | _], Element, Y, Y1):- Y == Y1, random_element_list(L, Element).
 random_element([], _, _ , _).
 random_element(Board, Element, Y):- random_element(Board, Element, Y, 1).

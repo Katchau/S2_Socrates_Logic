@@ -61,7 +61,7 @@ jump_cycle(Board, NewBoard, Piece, X, Y, Xf, Yf):-  (
 														nl, display_board(NextBoard), nl,
 														repeat , 
 														(
-															destination_read(Xd, Yd, Xnew, Ynew),
+															length(Board, Length), destination_read(Length, Xd, Yd, Xnew, Ynew),
 															jump_cycle(NextBoard, NewBoard, Piece, Xd, Yd, Xnew, Ynew)
 														),
 														nl, display_board(NewBoard), nl
