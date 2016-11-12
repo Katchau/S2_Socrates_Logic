@@ -56,8 +56,7 @@ playGamePVP(N, Board, Boardsize):- N1 is N+1,
 							);
 							(
 								Num \== 0,
-								bot_play(Board, Piece, N),
-								NewBoard = Board
+								bot_play(Board, NewBoard, o, N)
 							)
                         ),
 						(
