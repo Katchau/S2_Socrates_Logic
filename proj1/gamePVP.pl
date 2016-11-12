@@ -51,6 +51,26 @@ destination_read(X, Y, Xf, Yf):- repeat,
 								  	 readCoords(Xf,Yf),
 								  	 validate_destination(X, Y, Xf, Yf)
 								  ).
+								  
+player_play(Board, NewBoard, Num, Piece):-  repeat,
+											(
+												 first_read(Board, Piece, X, Y, Num),
+												 destination_read(X, Y, Xf, Yf),
+												 (
+													 jump_cycle(Board, NewBoard, Piece, X, Y, Xf, Yf);
+													 (
+														 replace_element(Board, CleanBoard, X, Y, v) ,check_ortho_adjacency(CleanBoard, Piece, Xf, Yf), 
+														 check_restriction(Board, X, Y, Xf, Yf), 
+														 (
+															 (
+																 check_center_move(10, X, Y, Xf, Yf);
+																 check_mov_adjoining(Board, Xf, Yf)
+															 ),
+															 move_piece(Board, NewBoard, X, Y, Xf, Yf, Piece)
+														 )
+													 )
+												 )
+											).
 			   
 initGamePVP():- load_lib,
                 middle_board(Board),
@@ -67,29 +87,9 @@ playGamePVP(N, Board):- N1 is N+1,
                             not(verifyPossiblePlay(Board, Piece, Num)),
                             NewBoard = Board,
                             write('Impossible Movement'), nl;
-                            (
-                                repeat,
-                                (
-                                    first_read(Board, Piece, X, Y, Num),
-                                    destination_read(X, Y, Xf, Yf),
-                                    (
-                                        jump_cycle(Board, NewBoard, Piece, X, Y, Xf, Yf);
-                                        (
-                                            replace_element(Board, CleanBoard, X, Y, v) ,check_ortho_adjacency(CleanBoard, Piece, Xf, Yf), 
-											check_restriction(Board, X, Y, Xf, Yf), 
-                                            (
-                                                (
-                                                    check_center_move(10, X, Y, Xf, Yf);
-                                                    check_mov_adjoining(Board, Xf, Yf)
-                                                ),
-                                                move_piece(Board, NewBoard, X, Y, Xf, Yf, Piece)
-                                            )
-                                        )
-                                    )
-                                )
-                            )
+                            player_play(Board, NewBoard, Num, Piece)
                         ),
-						            (
+						(
                             game_over(Piece, NewBoard, Pnum);
                             playGamePVP(N1, NewBoard)
                         ).

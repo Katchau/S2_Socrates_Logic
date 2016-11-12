@@ -1,4 +1,4 @@
-load_lib:- use_module(library(lists)).
+load_lib:- use_module(library(lists)), use_module(library(random)).
 
 get_vector(X0, Y0, X , Y, Xf, Yf):- Xf is X - X0, Yf is Y - Y0 .
 
@@ -30,3 +30,10 @@ replace_element(Board, NewBoard, X, Y, Peca):- replace_element_board(Board, NewB
 
 clean_two_elements(Board, NewBoard, X0, Y0, X, Y):- replace_element(Board, Inter, X0, Y0, v), replace_element(Inter, NewBoard, X, Y, v).
 move_piece(Board, NewBoard, X0, Y0, X, Y, Peca):- replace_element(Board, Inter, X0, Y0, v), replace_element(Inter, NewBoard, X, Y, Peca).
+
+random_element_list(L, Element, X):- length(L, Length), random(0, Length, Index), nth0(Index, List, Element).
+
+random_element([_ | Ls], Element, Y, Y1):- Y \== Y1, Y2 is Y1 + 1, random_element(Ls, Element, Y, Y2).
+random_element([L | _], Element, Y, Y1):- Y == Y1, random_element_list(L, Element, X).
+random_element([], _, _ , _).
+random_element(Board, Element, Y):- random_element(Board, Element, Y, 1).
