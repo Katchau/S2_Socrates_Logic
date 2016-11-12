@@ -37,8 +37,23 @@ verifyPlayerPiece(Pnum, Piece):- Piece == 'x', Pnum == 0; Piece == 'o', Pnum == 
 checkRightPiece(Board, X, Y, Pnum, Piece):- select_piece(Board, X, Y, Piece),
                                             verifyPlayerPiece(Pnum, Piece).
 
+											
+first_read(Board, Piece, X, Y, Num):- repeat,
+									  (
+										  write('Enter the coordinates of the piece:'), nl,
+										  readCoords(X,Y),
+										  checkRightPiece(Board, X, Y, Num, Piece)
+									  ).
+
+destination_read(X, Y, Xf, Yf):- repeat,
+								  (
+								  	 write('Enter the coordinates of the destinantion of the piece:'), nl,
+								  	 readCoords(Xf,Yf),
+								  	 validate_destination(X, Y, Xf, Yf)
+								  ).
+			   
 initGamePVP():- load_lib,
-                board(Board),
+                middle_board(Board),
                 playGamePVPinit(Board).
 
 playGamePVPinit(Board):- N is 0,
@@ -55,19 +70,13 @@ playGamePVP(N, Board):- N1 is N+1,
                             (
                                 repeat,
                                 (
-                                    repeat,
+                                    first_read(Board, Piece, X, Y, Num),
+                                    destination_read(X, Y, Xf, Yf),
                                     (
-                                        write('Enter the coordinates of the piece:'), nl,
-                                        readCoords(X,Y),
-                                        checkRightPiece(Board, X, Y, Num, Piece)
-                                    ),
-                                    write('Enter the coordinates of the destinantion of the piece:'), nl,
-                                    readCoords(Xf,Yf),
-							                      validate_destination(X, Y, Xf, Yf),
-                                    (
-                                        jump(Board, NewBoard, Piece, X, Y, Xf, Yf);
+                                        jump_cycle(Board, NewBoard, Piece, X, Y, Xf, Yf);
                                         (
-                                            check_restriction(Board, X, Y, Xf, Yf),
+                                            replace_element(Board, CleanBoard, X, Y, v) ,check_ortho_adjacency(CleanBoard, Piece, Xf, Yf), 
+											check_restriction(Board, X, Y, Xf, Yf), 
                                             (
                                                 (
                                                     check_center_move(10, X, Y, Xf, Yf);

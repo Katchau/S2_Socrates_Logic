@@ -12,8 +12,8 @@ check_destinationCoords(X, Xf):- X == Xf.
 check_destinationCoords(X, Xf):- Xv is Xf - 1, X == Xv.
 check_destinationCoords(X, Xf):- Xv is Xf + 1, X == Xv.
 no_movement_selected(X0, Y0, X, Y):- X == X0, Y == Y0 .
-validate_destination(X0, Y0, X, Y):- not(no_movement_selected(X0, Y0, X, Y)), 
-									 check_destinationCoords(X0, X), check_destinationCoords(Y0, Y).
+validate_destination(X0, Y0, X, Y):- not(no_movement_selected(X0, Y0, X, Y)), !,
+									 check_destinationCoords(X0, X), !, check_destinationCoords(Y0, Y), !.
 
 replace_element_list([],[], _, _, _).
 replace_element_list([_ | L1], [Peca | L2], X, X1, Peca):- X == X1, X2 is X1 + 1, !, replace_element_list(L1, L2, X, X2, Peca).
