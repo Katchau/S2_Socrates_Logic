@@ -31,9 +31,13 @@ replace_element(Board, NewBoard, X, Y, Peca):- replace_element_board(Board, NewB
 clean_two_elements(Board, NewBoard, X0, Y0, X, Y):- replace_element(Board, Inter, X0, Y0, v), replace_element(Inter, NewBoard, X, Y, v).
 move_piece(Board, NewBoard, X0, Y0, X, Y, Peca):- replace_element(Board, Inter, X0, Y0, v), replace_element(Inter, NewBoard, X, Y, Peca).
 
-random_element_list(L, Element):- length(L, Length), random(0, Length, Index), nth0(Index, L, Element).
+random_element_list(L, Length, Element, Index):- random(0, Length, Index), nth0(Index, L, Element).
 
-random_element([_ | Ls], Element, Y, Y1):- Y \== Y1, Y2 is Y1 + 1, random_element(Ls, Element, Y, Y2).
-random_element([L | _], Element, Y, Y1):- Y == Y1, random_element_list(L, Element).
-random_element([], _, _ , _).
-random_element(Board, Element, Y):- random_element(Board, Element, Y, 1).
+get_random_index(L, Piece, Index):- member(Piece, L),
+									length(L, Length),
+									repeat,
+									(
+										random_element_list(L, Length, Element, X),
+										Element == Piece,
+										Index is X + 1
+									).

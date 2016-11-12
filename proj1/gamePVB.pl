@@ -1,4 +1,4 @@
-:-include('player.pl').
+:-include('bot.pl').
 
 verifyPossiblePlay(Board, Boardsize, Piece, Pnum):- X is 1, Y is 1, Xf is 1, Yf is 1,
                                          verifyPossiblePlay_aux(Board, Boardsize, Piece, Pnum, X, Y, Xf, Yf), !.
@@ -32,7 +32,8 @@ verifyPossiblePlay_aux2(Board, Boardsize, Piece, Pnum, X, Y, Xf, Yf):- validate_
                                                             verifyPossiblePlay_aux2(Board, Boardsize, Piece, Pnum, X, Y, Xf, Yfn).
 
 
-															
+			   
+
 initGamePVP():- load_lib,
                 board(Board),
                 playGamePVPinit(Board).
@@ -49,7 +50,15 @@ playGamePVP(N, Board, Boardsize):- N1 is N+1,
                             not(verifyPossiblePlay(Board, Boardsize, Piece, Num)),
                             NewBoard = Board,
                             write('Impossible Movement'), nl;
-                            player_play(Board, NewBoard, Boardsize, Num, Piece)
+                            (
+								Num == 0,
+								player_play(Board, NewBoard, Boardsize, Num, Piece)
+							);
+							(
+								Num \== 0,
+								bot_play(Board, Piece, N),
+								NewBoard = Board
+							)
                         ),
 						(
                             game_over(Piece, NewBoard, Pnum);
