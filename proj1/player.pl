@@ -48,7 +48,7 @@ nextPossiblePlay_aux(Board, B_s, Piece, [L1 | Ls], X , Y):-	(
 
 % PP = possible plays
 nextPossiblePlays(Board, Piece, PP):- X is 1, Y is 1, length(Board, B_s),
-                                     nextPossiblePlay_aux(Board, B_s, Piece, PP, X, Y), !.	   
+                                     nextPossiblePlay_aux(Board, B_s, Piece, PP, X, Y), !.
 
 determine_player(Num, x):- Num == 0 .
 determine_player(Num, o):- Num \== 0 .
@@ -60,10 +60,10 @@ verify_no_play(Plays):- nth0(0, Plays, Ele), length(Ele, L), L \== 2, !.
 checkRightPiece(Board, X, Y, Pnum, Piece):- select_piece(Board, X, Y, Piece),
                                             verifyPlayerPiece(Pnum, Piece).
 
-											
+
 first_read(Board, Boardsize, Piece, X, Y, Num):- repeat,
 									  (
-										  write('Enter the coordinates of the piece:'), nl,
+										  nl, write('Enter the coordinates of the piece:'), nl,
 										  readCoords(X,Y, Boardsize),
 										  checkRightPiece(Board, X, Y, Num, Piece)
 									  ).
@@ -71,16 +71,16 @@ first_read(Board, Boardsize, Piece, X, Y, Num):- repeat,
 destination_read(Boardsize, X, Y, Xf, Yf):- write('Enter the coordinates of the destinantion of the piece:'), nl,
 											readCoords(Xf,Yf, Boardsize),
 											validate_destination(X, Y, Xf, Yf).
-								  
+
 player_play(Board, NewBoard, Boardsize, Num, Piece):-  repeat,
-											(	
+											(
 												 first_read(Board, Boardsize, Piece, X, Y, Num),
 												 destination_read(Boardsize, X, Y, Xf, Yf),
 												 (
 													 jump_cycle(Board, NewBoard, Piece, X, Y, Xf, Yf);
 													 (
-														 replace_element(Board, CleanBoard, X, Y, v) ,check_ortho_adjacency(CleanBoard, Piece, Xf, Yf), 
-														 check_restriction(Board, X, Y, Xf, Yf), 
+														 replace_element(Board, CleanBoard, X, Y, v) ,check_ortho_adjacency(CleanBoard, Piece, Xf, Yf),
+														 check_restriction(Board, X, Y, Xf, Yf),
 														 (
 															 (
 																 check_center_move(Boardsize, X, Y, Xf, Yf);
@@ -91,4 +91,3 @@ player_play(Board, NewBoard, Boardsize, Num, Piece):-  repeat,
 													 )
 												 )
 											).
-			   
