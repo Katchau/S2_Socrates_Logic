@@ -6,7 +6,7 @@ initGamePVB():- load_lib,
                 playGamePVBinit(Board).
 
 playGamePVBinit(Board):- N is 0,
-						             length(Board, Boardsize),
+						 length(Board, Boardsize),
                          repeat,
                          (
                             write('Num of the player(1,2):'),

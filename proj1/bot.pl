@@ -43,7 +43,7 @@ jump_bot_cycle(Board, NewBoard, Piece, X, Y, Xf, Yf):- (
 															repeat , 
 															(
 																get_random_ortho(Xd, Yd, Xnew, Ynew),
-																jump_cycle(NextBoard, NewBoard, Piece, Xd, Yd, Xnew, Ynew)
+																jump_bot_cycle(NextBoard, NewBoard, Piece, Xd, Yd, Xnew, Ynew)
 															),
 															nl, display_board(NewBoard), nl
 														); 
@@ -70,17 +70,23 @@ verify_bot_movement(Board, NewBoard, Piece, X, Y):- Xf is X - 1, Yf is Y, bot_mo
 verify_bot_movement(Board, NewBoard, Piece, X, Y):- Xf is X, Yf is Y + 1, bot_movement_aux(Board, NewBoard, Piece, X, Y, Xf, Yf).
 verify_bot_movement(Board, NewBoard, Piece, X, Y):- Xf is X, Yf is Y - 1, bot_movement_aux(Board, NewBoard, Piece, X, Y, Xf, Yf).
 
-															
+random_cycle(Board, NewBoard, Piece, X, Y):- repeat,
+												(
+													get_random_dest(X, Y, Xf, Yf),
+													bot_movement_aux(Board, NewBoard, Piece, X, Y, Xf, Yf)
+												).						
 
 choose_random_ini_movement(Board, NewBoard, Piece, X, Y):- verify_bot_movement(Board, NewBoard, Piece, X, Y).
 
-choose_random_movement(Board, NewBoard, Piece, Plays):- length(Plays, Num), N is Num - 1, random(0, N, Random),
+
+
+choose_random_movement(Board, NewBoard, Piece, Plays):- length(Plays, Num), N is Num - 1, N >= 1, random(0, N, Random),
 														nth0(Random, Plays, Vect), nth0(0, Vect, X), nth0(1, Vect, Y),
-														repeat,
-														(
-															get_random_dest(X, Y, Xf, Yf),
-															bot_movement_aux(Board, NewBoard, Piece, X, Y, Xf, Yf)
-														).
+														random_cycle(Board, NewBoard, Piece, X, Y).
+
+choose_random_movement(Board, NewBoard, Piece, Plays):- nth0(0, Plays, Vect), nth0(0, Vect, X), nth0(1, Vect, Y),
+														random_cycle(Board, NewBoard, Piece, X, Y).
+
 
 bot_play(Board, NewBoard, Plays, Piece, N_turn):-  choose_random_movement(Board, NewBoard, Piece, Plays).
 											%repeat,
