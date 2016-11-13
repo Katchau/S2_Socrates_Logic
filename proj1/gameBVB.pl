@@ -1,4 +1,4 @@
-:-include('bot.pl').
+:-include('gamePVP.pl').
 
 initGameBVB():- load_lib,
                 board(Board),
@@ -23,7 +23,7 @@ playGameBVB(N, Board, Boardsize):- N1 is N+1,
 							bot_play(Board, NewBoard, Plays, Piece, N)
                         ),
 						(
-                            game_over(Piece, NewBoard, Pnum), 
-							nl, write(N1), write("Plays were made");
+                            game_over(Piece, NewBoard, Pnum),
+							nl, write(N1), write(" plays were made");
                             playGameBVB(N1, NewBoard, Boardsize)
                         ).
