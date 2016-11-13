@@ -1,5 +1,7 @@
 load_lib:- use_module(library(lists)), use_module(library(random)).
 
+array_push([X , Y], X, Y).
+
 get_vector(X0, Y0, X , Y, Xf, Yf):- Xf is X - X0, Yf is Y - Y0 .
 
 validate_coord(X, Boardsize):- X =< Boardsize , X >= 1 .

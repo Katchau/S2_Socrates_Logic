@@ -64,65 +64,13 @@ bot_movement_aux(Board, NewBoard, Piece, X, Y, Xf, Yf):- validate_destination(X,
                                                                )
                                                             ).
 
-verify_bot_movement_aux(Board, Piece, X, Y, Xf, Yf):- select_piece(Board, X, Y, Elem), Elem == Piece,
-                                                      (
-                                                         jump(Board, _, Piece, X, Y, Xf, Yf);
-                                                         (
-															   replace_element(Board, CleanBoard, X, Y, v) ,check_ortho_adjacency(CleanBoard, Piece, Xf, Yf),
-                                                             check_restriction(Board, X, Y, Xf, Yf),
-                                                             (
-                                                                length(Board, Boardsize), check_center_move(Boardsize, X, Y, Xf, Yf);
-                                                                check_mov_adjoining(Board, Xf, Yf)
-                                                             )
-                                                         )
-                                                      ).
-
 															
 verify_bot_movement(Board, NewBoard, Piece, X, Y):- Xf is X + 1, Yf is Y, bot_movement_aux(Board, NewBoard, Piece, X, Y, Xf, Yf).
 verify_bot_movement(Board, NewBoard, Piece, X, Y):- Xf is X - 1, Yf is Y, bot_movement_aux(Board, NewBoard, Piece, X, Y, Xf, Yf).
 verify_bot_movement(Board, NewBoard, Piece, X, Y):- Xf is X, Yf is Y + 1, bot_movement_aux(Board, NewBoard, Piece, X, Y, Xf, Yf).
 verify_bot_movement(Board, NewBoard, Piece, X, Y):- Xf is X, Yf is Y - 1, bot_movement_aux(Board, NewBoard, Piece, X, Y, Xf, Yf).
 
-
-verify_bot_movement2(Board, Piece, X, Y):- Xf is X + 1, Yf is Y, verify_bot_movement_aux(Board, Piece, X, Y, Xf, Yf).
-verify_bot_movement2(Board, Piece, X, Y):- Xf is X - 1, Yf is Y, verify_bot_movement_aux(Board, Piece, X, Y, Xf, Yf).
-verify_bot_movement2(Board, Piece, X, Y):- Xf is X, Yf is Y + 1, verify_bot_movement_aux(Board, Piece, X, Y, Xf, Yf).
-verify_bot_movement2(Board, Piece, X, Y):- Xf is X, Yf is Y - 1, verify_bot_movement_aux(Board, Piece, X, Y, Xf, Yf).
-verify_bot_movement2(Board, Piece, X, Y):- Xf is X + 1, Yf is Y - 1, verify_bot_movement_aux(Board, Piece, X, Y, Xf, Yf).
-verify_bot_movement2(Board, Piece, X, Y):- Xf is X - 1, Yf is Y - 1, verify_bot_movement_aux(Board, Piece, X, Y, Xf, Yf).
-verify_bot_movement2(Board, Piece, X, Y):- Xf is X + 1, Yf is Y + 1, verify_bot_movement_aux(Board, Piece, X, Y, Xf, Yf).
-verify_bot_movement2(Board, Piece, X, Y):- Xf is X - 1, Yf is Y + 1, verify_bot_movement_aux(Board, Piece, X, Y, Xf, Yf).
-
-array_push([X , Y], X, Y).
-
-% PP = possible plays
-botPossiblePlays(Board, Piece, PP):- X is 1, Y is 1, length(Board, B_s),
-                                     botPossiblePlay_aux(Board, B_s, Piece, PP, X, Y), !.
-
-next_possible_step(Board, B_s, Piece, PP, X , Y):-	(
-																	X < B_s,
-																	Xn is X + 1,
-																	botPossiblePlay_aux(Board, B_s, Piece,  PP, Xn , Y)
-																);
-																(
-																	Y < B_s,
-																	Xn is 1,
-																	Yn is Y + 1,
-																	botPossiblePlay_aux(Board, B_s, Piece, PP, Xn , Yn)
-																).
-
-botPossiblePlay_aux(_, B_s, _, _, X, Y):- X == B_s, Y == B_s .
-botPossiblePlay_aux(Board, B_s, Piece, [L1 | Ls], X , Y):-	(
-																	verify_bot_movement2(Board, Piece, X, Y),
-																	array_push(L1, X, Y),
-																	next_possible_step(Board, B_s, Piece, Ls, X , Y)
-																);
- 																next_possible_step(Board, B_s, Piece, [L1 | Ls], X , Y).
-
-
-
-
-																		
+															
 
 choose_random_ini_movement(Board, NewBoard, Piece, X, Y):- verify_bot_movement(Board, NewBoard, Piece, X, Y).
 
@@ -134,7 +82,7 @@ choose_random_movement(Board, NewBoard, Piece, Plays):- length(Plays, Num), N is
 															bot_movement_aux(Board, NewBoard, Piece, X, Y, Xf, Yf)
 														).
 
-bot_play(Board, NewBoard, Piece, N_turn):-  botPossiblePlays(Board, Piece, Plays), choose_random_movement(Board, NewBoard, Piece, Plays).
+bot_play(Board, NewBoard, Plays, Piece, N_turn):-  choose_random_movement(Board, NewBoard, Piece, Plays).
 											%repeat,
 											%(
 											%	get_random_initial(Board, Piece, X, Y),
