@@ -16,9 +16,21 @@ playGamePVBinit(Board):- N is 0,
                                 NumPlay == 2
                             )
                          ),
-                         playGamePVB(N, Board, Boardsize, NumPlay).
-
-playGamePVB(N, Board, Boardsize, NumPlay):- NPlay is (NumPlay-1),
+					  	repeat,
+					  					(
+					  	nl, write('Bots difficulty: '), nl,
+					  	write(' 1- Easy'), nl, 
+					  	write(' 2- Hard'), nl, 
+					  						write('Difficulty of the bot:'),
+					  						read(DifBot),
+					  						(
+					  							DifBot == 1;
+					  							DifBot == 2
+					  						)
+					  					),
+					  					playGamePVB(N, Board, Boardsize, NumPlay, DifBot).
+					  
+playGamePVB(N, Board, Boardsize, NumPlay, DifBot):- NPlay is (NumPlay-1),
                                             N1 is N+1,
                                             Num is (N mod 2), Pnum is (Num + 1), nl,
 						                                determine_player(Num, Piece),
@@ -35,11 +47,17 @@ playGamePVB(N, Board, Boardsize, NumPlay):- NPlay is (NumPlay-1),
 							                            );
 							                            (
 								                                  Num \== NPlay,
-                                                  write('CPU playing...'), nl,
-								                                  bot_play(Board, NewBoard, Plays, Piece, N)
+																  write('CPU playing...'), nl,
+																  (
+																	DifBot == 1,
+																	bot_play(Board, NewBoard, Plays, Piece);
+																	DifBot == 2,
+																	hard_bot_play(Board, NewBoard, Plays, Piece)
+																  )
+								                                  
 							                            )
                                           ),
 						                              (
                                                   game_over(Piece, NewBoard, Pnum);
-                                                  playGamePVB(N1, NewBoard, Boardsize, NumPlay)
+                                                  playGamePVB(N1, NewBoard, Boardsize, NumPlay, DifBot)
                                           ).
