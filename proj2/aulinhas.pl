@@ -1,10 +1,40 @@
 :- use_module(library(clpfd)).
 :- use_module(library(lists)).
 
+somaNnumeros(Start, End, Soma):-
+	Start >= End,
+	Soma is Start, !.
+somaNnumeros(Start, End, Soma):- !,
+		Start \= End,
+		Next = Start + 1,
+		somaNnumeros(Next, End, Soma1),
+		Soma is Soma1 + Start, !. 
+
 criaCalendario(NumSemanas, Calendario):-
     NumDias is (NumSemanas * 5),
     length(Calendario, NumDias).
 
+criarDia(_, [], DS):- DS == 6 . %fim de semana. que bom
+criarDia(Disciplinas, [Dia | Resto], DS):-
+	DS \= 6,
+	length(Dia, Disciplinas),
+	domain(Dia, 0, Disciplinas),
+	all_distinct(Dia),
+	Prox is DS+ 1,
+	labeling([], Dia),
+	criarDia(Disciplinas, Resto, Prox).
+
+deleteZeros([],[]).
+deleteZeros([L1 | Ls], [R1 | Rs]):-
+	delete(L1, 0, R1),
+	deleteZeros(Ls, Rs).
+
+%ainda em protótipo. Dp tem de se dar uns randomzitos
+criarHorario(Disciplinas, Horario):-
+		criarDia(Disciplinas, Temp, 1),
+		deleteZeros(Temp, Horario),
+		verificarDias(Horario, Disciplinas).
+	
 verificaTestesAno(NumSemanas, Disciplinas):-
     criaCalendario(NumSemanas, Calendario),
     domain(Disciplinas,0,2),
