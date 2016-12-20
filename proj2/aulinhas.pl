@@ -50,6 +50,28 @@ verificaTPCMesmaSemana(Dias):-
     verificaTPCNoDia(Dias, 1, 3),
     labeling([], Dias).
 
+unirDias([], []).
+unirDias([Dia | Ndias], Juncao):-
+	unirDias(Dia, D1),
+    unirDias(Ndias, D2),
+    append(D1, D2, Juncao),
+	!.
+unirDias(D, [D]). 
+
+verificarAulas(_, NDisciplinas, Disc):-
+NDisciplinas == Disc.
+verificarAulas(Total, NDisciplinas, Disc):-
+	NDisciplinas \= Disc,
+	count(Disc, Total, #>=, 1), %1 a 4 aulas por semana 1 cadeira
+	count(Disc, Total, #=<, 4),
+	Disc2 is Disc + 1,
+	verificarAulas(Total, NDisciplinas, Disc2).
+
+verificarDias(Horario, NDisciplinas):-
+	unirDias(Horario, Total),
+	nvalue(NDisciplinas, Total),
+	verificarAulas(Total, NDisciplinas, 1).	
+
 imprimeCalendario([]).
 imprimeCalendario([Segunda, Terca, Quarta, Quinta, Sexta | Resto]):-
     format("Segunda:~w Terca:~w Quarta:~w Quinta:~w Sexta:~w ~n",[Segunda, Terca, Quarta, Quinta, Sexta]),
