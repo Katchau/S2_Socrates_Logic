@@ -6,17 +6,26 @@ criaCalendario(NumSemanas, Calendario):-
     length(Calendario, NumDias).
 
 verificaTestesAno(NumSemanas, Disciplinas):-
+    length(Disciplinas, NumTestes),
     criaCalendario(NumSemanas, Calendario),
-    domain(Disciplinas,0,2),
-    domain(Calendario,0,1),
-    length(Disciplinas, Tamanho),
-    NumTestes is (Tamanho * 2),
+    length(Calendario, NumDias),
+    domain(Disciplinas,0,1),
+    domain(Calendario,0,NumTestes),
     sum(Disciplinas, #=, NumTestes),
-    sum(Calendario, #=, NumTestes),
+    NumDiasSemTeste is (NumDias - NumTestes),
+    count(0, Calendario, #=, NumDiasSemTeste),
     verificaTestesTodasSemanas(Calendario),
+    verificaTestesDiferentes(Calendario, NumTestes, 1),
     labeling([], Calendario),
     imprimeCalendario(Calendario),
     labeling([], Disciplinas).
+
+verificaTestesDiferentes(Calendario, NumTestes, Teste):-
+    Teste =< NumTestes,
+    count(Teste, Calendario, #=, 1),
+    TesteSeguinte is Teste + 1,
+    verificaTestesDiferentes(Calendario, NumTestes, TesteSeguinte).
+verificaTestesDiferentes(_,_,_).
 
 verificaTestesTodasSemanas([]).
 verificaTestesTodasSemanas([Dia1, Dia2, Dia3, Dia4, Dia5  | Resto]):-
@@ -24,14 +33,12 @@ verificaTestesTodasSemanas([Dia1, Dia2, Dia3, Dia4, Dia5  | Resto]):-
     verificaTestesTodasSemanas(Resto).
 
 verificaTestesMesmaSemana(Dias):-
-    sum(Dias, #=< ,2),
+    count(0, Dias, #>= ,3),
     verfificaTestesDiasConsecutivos(Dias).
 
-verfificaTestesDiasConsecutivos([]).
-verfificaTestesDiasConsecutivos([Dia]):-
-    Dia #=< 1.
+verfificaTestesDiasConsecutivos([_]).
 verfificaTestesDiasConsecutivos([Dia1 | [Dia2 | Resto]]):-
-    Dia1 + Dia2 #=< 1,
+    count(0,[Dia1, Dia2], #>=, 1),
     verfificaTestesDiasConsecutivos([Dia2 | Resto]).
 
 verificaTPCNoDia([],_,_).
@@ -56,7 +63,7 @@ unirDias([Dia | Ndias], Juncao):-
     unirDias(Ndias, D2),
     append(D1, D2, Juncao),
 	!.
-unirDias(D, [D]). 
+unirDias(D, [D]).
 
 verificarAulas(_, NDisciplinas, Disc):-
 NDisciplinas == Disc.
@@ -70,7 +77,7 @@ verificarAulas(Total, NDisciplinas, Disc):-
 verificarDias(Horario, NDisciplinas):-
 	unirDias(Horario, Total),
 	nvalue(NDisciplinas, Total),
-	verificarAulas(Total, NDisciplinas, 1).	
+	verificarAulas(Total, NDisciplinas, 1).
 
 imprimeCalendario([]).
 imprimeCalendario([Segunda, Terca, Quarta, Quinta, Sexta | Resto]):-
