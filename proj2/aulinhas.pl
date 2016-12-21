@@ -1,5 +1,6 @@
 :- use_module(library(clpfd)).
 :- use_module(library(lists)).
+:- use_module(library(random)).
 
 somaNnumeros(Start, End, Soma):-
 	Start >= End,
@@ -108,6 +109,59 @@ criarHorario(Disciplinas, Horario):-
 	criarDia(Disciplinas, Temp, 1),
 	deleteZeros(Temp, Horario),
 	verificarDias(Horario, Disciplinas).
+
+totalAulasCadeira([],_,Soma):- Soma is 0.
+totalAulasCadeira([Dia1 | Resto], Cadeira, Soma):-
+	member(Cadeira, Dia1),
+	totalAulasCadeira(Resto, Cadeira, Soma1),
+	Soma is Soma1 + 1.
+totalAulasCadeira([Dia1 | Resto], Cadeira, Soma):-
+	\+ member(Cadeira, Dia1),
+	totalAulasCadeira(Resto, Cadeira, Soma1),
+	Soma is Soma1 + 0.
+totalCadeiras(_, _, [], []).
+totalCadeiras(NumSemanas, Horario, [C1 | Cr], [T1 | Tr]):-
+	totalAulasCadeira(Horario, C1, Tmp),
+	T1 is Tmp * NumSemanas,
+	totalCadeiras(NumSemanas, Horario, Cr, Tr).%todo testar isto
+	
+
+%tpc diario
+verificarTPCD([],[]).
+verificarTPCD([Dia | Resto], [TPCd | TPCr]):-
+	length(Dia, Length),%ter outro array com pushs da posicao dos 1, dp fazer um count para ver quantos é que tem, sendo esse count limitado
+	length(TPCd, Length),
+	domain(TPCd, 0, 1),
+	count(1,TPCd,#=<,2),% max 2 tpc diario
+	sum(TPCd,#=,Max),
+	labeling([maximize(Max)], TPCd), 
+	verificarTPCD(Resto, TPCr).
+
+cleanDay(Day, Length):-
+	length(Day, Length),
+	maplist(=(0), Day).% wow
+
+removeDayOff([], [], _, _).
+removeDayOff([Old | Or], [New | Nr], Day, CurD):-
+	Day == CurD,
+	length(Old, Length),
+	cleanDay(New,Length),
+	NexD is CurD + 1,
+	removeDayOff(Or, Nr, Day, NexD).
+removeDayOff([Old | Or], [Old | Nr], Day, CurD):-
+	Day \= CurD,
+	NexD is CurD + 1,
+	removeDayOff(Or, Nr, Day, NexD).
+
+%tpc semanal
+verificarTPCS(NumSemanas , _, [], NSemana):- NumSemanas == NSemana.
+verificarTPCS(NumSemanas, Horario, NoClass, [TPC1 | Resto], NSemana):-
+	NumSemanas \= NSemana,
+	verificarTPCD(Horario, TPC1). %todo acabar tpc total
+	
+verificarTPC(NumSemanas, Horario, TPC):-
+	random(0, 5, NoClass),
+	verificarTPCS(NumSemanas, Horario, NoClass, TPC, 1).
 
 imprimeCalendario([]).
 imprimeCalendario([Segunda, Terca, Quarta, Quinta, Sexta | Resto]):-
