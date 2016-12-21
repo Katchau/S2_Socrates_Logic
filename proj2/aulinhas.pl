@@ -18,7 +18,7 @@ criaCalendario(NumSemanas, Calendario):-
     NumDias is (NumSemanas * 5),
     length(Calendario, NumDias).
 
-verificaTestesAno(NumSemanas, Disciplinas):-
+verificaTestesAno(NumSemanas, Disciplinas, Horario):-
     length(Disciplinas, NumDisciplinas),
 		NumTestes is (NumDisciplinas * 2),
     criaCalendario(NumSemanas, Calendario),
@@ -29,9 +29,9 @@ verificaTestesAno(NumSemanas, Disciplinas):-
     NumDiasSemTeste is (NumDias - NumTestes),
     count(0, Calendario, #=, NumDiasSemTeste),
 		divisaoDosTestes(Calendario, TestesInt, TestesFin),
-    verificaTestesTodasSemanas(TestesInt),
+    verificaTestesTodasSemanas(TestesInt, Horario),
     verificaTestesDiferentes(TestesInt, NumDisciplinas, 1),
-		verificaTestesTodasSemanas(TestesFin),
+		verificaTestesTodasSemanas(TestesFin, Horario),
     verificaTestesDiferentes(TestesFin, NumDisciplinas, 1),
     labeling([], Calendario),
     imprimeCalendario(Calendario),
@@ -53,10 +53,17 @@ verificaTestesDiferentes(Calendario, NumTestes, Teste):-
     verificaTestesDiferentes(Calendario, NumTestes, TesteSeguinte).
 verificaTestesDiferentes(_,_,_).
 
-verificaTestesTodasSemanas([]).
-verificaTestesTodasSemanas([Dia1, Dia2, Dia3, Dia4, Dia5  | Resto]):-
+verificaTestesTodasSemanas([], _).
+verificaTestesTodasSemanas([Dia1, Dia2, Dia3, Dia4, Dia5  | Resto], Horario):-
     verificaTestesMesmaSemana([Dia1, Dia2, Dia3, Dia4, Dia5]),
-    verificaTestesTodasSemanas(Resto).
+		verificaDisciplinasNoDia([Dia1, Dia2, Dia3, Dia4, Dia5], Horario),
+    verificaTestesTodasSemanas(Resto, Horario).
+
+verificaDisciplinasNoDia([],[]).
+verificaDisciplinasNoDia([Teste | Outros], [Dia | Resto]):-
+		append(Dia, [0], Ver),
+		count(Teste, Ver, #=, 1),
+		verificaDisciplinasNoDia(Outros, Resto).
 
 verificaTestesMesmaSemana(Dias):-
     count(0, Dias, #>= ,3),
