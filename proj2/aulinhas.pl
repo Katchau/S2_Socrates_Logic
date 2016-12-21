@@ -2,6 +2,9 @@
 :- use_module(library(lists)).
 :- use_module(library(random)).
 
+divideLista(L, T):-
+		sublist(L,T,3,_,0).
+
 somaNnumeros(Start, End, Soma):-
 	Start >= End,
 	Soma is Start, !.
@@ -16,19 +19,32 @@ criaCalendario(NumSemanas, Calendario):-
     length(Calendario, NumDias).
 
 verificaTestesAno(NumSemanas, Disciplinas):-
-    length(Disciplinas, NumTestes),
+    length(Disciplinas, NumDisciplinas),
+		NumTestes is (NumDisciplinas * 2),
     criaCalendario(NumSemanas, Calendario),
     length(Calendario, NumDias),
-    domain(Disciplinas,0,1),
-    domain(Calendario,0,NumTestes),
-    sum(Disciplinas, #=, NumTestes),
+    domain(Disciplinas,0,2),
+    domain(Calendario,0,NumDisciplinas),
+		sum(Disciplinas, #=, NumTestes),
     NumDiasSemTeste is (NumDias - NumTestes),
     count(0, Calendario, #=, NumDiasSemTeste),
-    verificaTestesTodasSemanas(Calendario),
-    verificaTestesDiferentes(Calendario, NumTestes, 1),
+		divisaoDosTestes(Calendario, TestesInt, TestesFin),
+    verificaTestesTodasSemanas(TestesInt),
+    verificaTestesDiferentes(TestesInt, NumDisciplinas, 1),
+		verificaTestesTodasSemanas(TestesFin),
+    verificaTestesDiferentes(TestesFin, NumDisciplinas, 1),
     labeling([], Calendario),
     imprimeCalendario(Calendario),
     labeling([], Disciplinas).
+
+divisaoDosTestes(Calendario, TestesInt, TestesFin):-
+		length(Calendario, Tam),
+		T is div(Tam, 5),
+		Tamanho is div(T, 2),
+		TFin is Tamanho * 5,
+		sublist(Calendario, TestesFin,TFin,_,0),
+		TInt is Tam - TFin,
+		sublist(Calendario, TestesInt,0,_,TInt).
 
 verificaTestesDiferentes(Calendario, NumTestes, Teste):-
     Teste =< NumTestes,
@@ -124,7 +140,7 @@ totalCadeiras(NumSemanas, Horario, [C1 | Cr], [T1 | Tr]):-
 	totalAulasCadeira(Horario, C1, Tmp),
 	T1 is Tmp * NumSemanas,
 	totalCadeiras(NumSemanas, Horario, Cr, Tr).%todo testar isto
-	
+
 
 %tpc diario
 verificarTPCD([],[]).
@@ -134,7 +150,7 @@ verificarTPCD([Dia | Resto], [TPCd | TPCr]):-
 	domain(TPCd, 0, 1),
 	count(1,TPCd,#=<,2),% max 2 tpc diario
 	sum(TPCd,#=,Max),
-	labeling([maximize(Max)], TPCd), 
+	labeling([maximize(Max)], TPCd),
 	verificarTPCD(Resto, TPCr).
 
 cleanDay(Day, Length):-
@@ -158,7 +174,7 @@ verificarTPCS(NumSemanas , _, [], NSemana):- NumSemanas == NSemana.
 verificarTPCS(NumSemanas, Horario, NoClass, [TPC1 | Resto], NSemana):-
 	NumSemanas \= NSemana,
 	verificarTPCD(Horario, TPC1). %todo acabar tpc total
-	
+
 verificarTPC(NumSemanas, Horario, TPC):-
 	random(0, 5, NoClass),
 	verificarTPCS(NumSemanas, Horario, NoClass, TPC, 1).
