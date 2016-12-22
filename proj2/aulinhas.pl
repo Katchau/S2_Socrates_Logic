@@ -24,8 +24,14 @@ verificarAulas(Total, NDisciplinas, Disc):-
 	Disc2 is Disc + 1,
 	verificarAulas(Total, NDisciplinas, Disc2).
 
+verificarAulasRepetidas([]).
+verificarAulasRepetidas([Dia | Resto]):-
+	all_distinct(Dia),
+	verificarAulasRepetidas(Resto).
+
 verificarDias(Horario, NDisciplinas):-
 	unirDias(Horario, Total),
+	verificarAulasRepetidas(Horario),
 	nvalue(NDisciplinas, Total),
 	verificarAulas(Total, NDisciplinas, 1).
 
@@ -280,5 +286,6 @@ verificarTPC(NumSemanas, Horario, NCadeiras):-
 	diaSemAulas(Horario, TotalC, NCadeiras, DiaOff),
 	removeDayOff(Horario, NewHorario, DiaOff, 1),
 	verificarTPCS(NumSemanas, 0, NewHorario, TotalC, TPC),
-	imprimeTPC(TPC).
+	write(TPC).
+	%imprimeTPC(TPC).
 
