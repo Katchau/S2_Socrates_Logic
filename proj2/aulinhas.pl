@@ -5,7 +5,7 @@
 somaNnumeros(Start, End, Soma):-
 	Start >= End,
 	Soma is Start.
-somaNnumeros(Start, End, Soma):- 
+somaNnumeros(Start, End, Soma):-
 		Start \= End,
 		Next = Start + 1,
 		somaNnumeros(Next, End, Soma1),
@@ -153,8 +153,8 @@ tpcCadeira([_ | Cr], [Tt | Tr], [Tt | Resto]):-
 tpcCadeira([C1 | Cr], [Tt | Tr], [C1 | Resto]):-
 	Tt == 1,
 	tpcCadeira(Cr, Tr, Resto).
-	
-	
+
+
 %tpc diario
 verificarTPCD([],[]).
 verificarTPCD([Dia | Resto], [TPCd | TPCr]):-
@@ -197,7 +197,7 @@ verificarTotalTPC(CurC, Tpc, [T1 | Tr]):-
 	count(CurC,Tpc,#=<,T1),
 	NexC is CurC + 1,
 	verificarTotalTPC(NexC, Tpc, Tr).
-	
+
 verificarTPC(NumSemanas, Horario, NCadeiras, TPC):-
 	totalCadeiras(NumSemanas, Horario, NCadeiras, 1, TotalC),!,
 	random(0, 5, NoClass),
