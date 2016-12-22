@@ -1,12 +1,78 @@
 :- use_module(library(clpfd)).
 :- use_module(library(random)).
+:- use_module(library(samsort)).
 :-include('calendario.pl').
 
 % anoEscolar(Horario, NumSemanas, NumDisciplinas):-
 	% verificaTestesAno(NumSemanas, NumDisciplinas, )
 
 
+unirDias([], []).
+unirDias([Dia | Ndias], Juncao):-
+	unirDias(Dia, D1),
+    unirDias(Ndias, D2),
+    append(D1, D2, Juncao),
+	!.
+unirDias(D, [D]).
 
+verificarAulas(_, NDisciplinas, Disc):-
+NDisciplinas < Disc.
+verificarAulas(Total, NDisciplinas, Disc):-
+	NDisciplinas >= Disc,
+	count(Disc, Total, #>=, 1), %1 a 4 aulas por semana 1 cadeira
+	count(Disc, Total, #=<, 4),
+	Disc2 is Disc + 1,
+	verificarAulas(Total, NDisciplinas, Disc2).
+
+verificarDias(Horario, NDisciplinas):-
+	unirDias(Horario, Total),
+	nvalue(NDisciplinas, Total),
+	verificarAulas(Total, NDisciplinas, 1).
+
+criarDia(_, [], DS):- DS == 6 . %fim de semana. que bom
+criarDia(Disciplinas, [Dia | Resto], DS):-
+	DS \= 6,
+	length(Dia, Disciplinas),
+	domain(Dia, 0, Disciplinas),
+	all_distinct(Dia),
+	Prox is DS+ 1,
+	labeling([down, all], Dia),
+	criarDia(Disciplinas, Resto, Prox).
+
+contagemNumeros(_, [], _).
+contagemNumeros(Dia, [O | Or],CurC):-
+	count(CurC, Dia, #=<, O),
+	NexC is CurC + 1,
+	contagemNumeros(Dia, Or, NexC).
+	
+	
+inicializarDias(_, [], _,_).
+inicializarDias(NDis, [Dia | Prox],NumCadeiras, CurC):-
+	length(Dia, NDis),
+	domain(Dia, 0, NDis),
+	all_distinct(Dia),
+	append(CurC, Dia, New),
+	contagemNumeros(New, NumCadeiras, 1),
+	labeling([down, all], Dia),
+	inicializarDias(NDis, Prox, NumCadeiras, New).
+
+criarHorario2(Disciplinas, Horario):-
+	length(Horario,5), % 5 dias da semana
+	length(NumCadeiras, Disciplinas),
+	domain(NumCadeiras, 1, 4),
+	labeling([down, all], NumCadeiras),
+	inicializarDias(Disciplinas, Horario, NumCadeiras, []).
+
+deleteZeros([],[]).
+deleteZeros([L1 | Ls], [R1 | Rs]):-
+ 	delete(L1, 0, R1),
+ 	deleteZeros(Ls, Rs).
+
+%ainda em protótipo. Dp tem de se dar uns randomzitos
+criarHorario(Disciplinas, Horario):-
+	criarDia(Disciplinas, Temp, 1),
+	deleteZeros(Temp, Horario),
+	verificarDias(Horario, Disciplinas).
 
 
 criaCalendario(NumSemanas, Calendario):-
@@ -27,8 +93,8 @@ verificaTestesAno(NumSemanas, NumDisciplinas, Horario, Calendario):-
 	verificaTestesTodasSemanas(TestesFin, Horario),
     labeling([middle, down], Calendario).
     %imprimeCalendarioTestes(Calendario).
-
-
+	
+	
 divisaoDosTestes(Calendario, NTestes, TestesInt, TestesFin):-
 	length(Calendario, Tam),
 	T is div(Tam, 5),
@@ -45,7 +111,7 @@ divisaoDosTestes(Calendario, NTestes, TestesInt, TestesFin):-
 	TTestI is round(Tmp2) * 5,
 	sublist(TestesInt, TestI,0,_,TTestI),
 	sum(TestI,#=,0).
-
+	
 
 verificaTestesDiferentes(Calendario, NumTestes, Teste):-
     Teste =< NumTestes,
@@ -76,50 +142,76 @@ verfificaTestesDiasConsecutivos([Dia1 | [Dia2 | Resto]]):-
     count(0,[Dia1, Dia2], #>=, 1),
     verfificaTestesDiasConsecutivos([Dia2 | Resto]).
 
+cleanDay(Day, Length):-
+	length(Day, Length),
+	maplist(=(0), Day).% wow
 
-unirDias([], []).
-unirDias([Dia | Ndias], Juncao):-
-	unirDias(Dia, D1),
-    unirDias(Ndias, D2),
-    append(D1, D2, Juncao),
-	!.
-unirDias(D, [D]).
+removeDayOff([], [], _, _).
+removeDayOff([Old | Or], [New | Nr], Day, CurD):-
+	Day == CurD,
+	length(Old, Length),
+	cleanDay(New,Length),
+	NexD is CurD + 1,
+	removeDayOff(Or, Nr, Day, NexD).
+removeDayOff([Old | Or], [Old | Nr], Day, CurD):-
+	Day \= CurD,
+	NexD is CurD + 1,
+	removeDayOff(Or, Nr, Day, NexD).
 
-verificarAulas(_, NDisciplinas, Disc):-
-NDisciplinas < Disc.
-verificarAulas(Total, NDisciplinas, Disc):-
-	NDisciplinas >= Disc,
-	count(Disc, Total, #>=, 1), %1 a 4 aulas por semana 1 cadeira
-	count(Disc, Total, #=<, 4),
-	Disc2 is Disc + 1,
-	verificarAulas(Total, NDisciplinas, Disc2).
+comprimentoDias([], []).
+comprimentoDias([D1 | Dr], [L | Ls]):-
+	length(D1, L),
+	comprimentoDias(Dr, Ls).
 
-verificarDias(Horario, NDisciplinas):-
-	unirDias(Horario, Total),
-	nvalue(NDisciplinas, Total),
-	verificarAulas(Total, NDisciplinas, 1).
+calcMediaDia([],_,[]).
+calcMediaDia([0 | Dr], MediaTotal, [0 | Mr]):-
+	calcMediaDia(Dr, MediaTotal, Mr).
+calcMediaDia([D1 | Dr], MediaTotal,[M1 | Mr]):-
+	nth1(D1, MediaTotal, M1),
+	calcMediaDia(Dr, MediaTotal, Mr),!.
 
-criarDia(_, [], DS):- DS == 6 . %fim de semana. que bom
-	criarDia(Disciplinas, [Dia | Resto], DS):-
-	DS \= 6,
-	length(Dia, Disciplinas),
-	domain(Dia, 0, Disciplinas),
-	all_distinct(Dia),
-	Prox is DS+ 1,
-	labeling([down, all], Dia),
-	criarDia(Disciplinas, Resto, Prox).
+calcMedia([],_,[]).
+calcMedia([D1 | Dr], MediaTotal, [M1 | Mr]):-
+	calcMediaDia(D1, MediaTotal, Tmp),
+	sumlist(Tmp, M1),
+	calcMedia(Dr, MediaTotal, Mr),!.
 
-deleteZeros([],[]).
-deleteZeros([L1 | Ls], [R1 | Rs]):-
- 	delete(L1, 0, R1),
- 	deleteZeros(Ls, Rs).
+verificarMembroDia(Horario, Dia, Elemento):-
+	nth1(Dia, Horario, ArrayDia),
+	member(Elemento, ArrayDia).
+	
+determinarDia(_, _, 69, Elems):-
+	Elems > 1.
+determinarDia(Horario, CurC, Dia, Elems):-
+	Elems == 1,
+	verificarMembroDia(Horario, Dia, CurC).
 
-%ainda em protótipo. Dp tem de se dar uns randomzitos
-criarHorario(Disciplinas, Horario):-
-	criarDia(Disciplinas, Temp, 1),
-	deleteZeros(Temp, Horario),
-	verificarDias(Horario, Disciplinas).
+diasNaoRemoviveis(_,_, NCadeiras, [], CurC):-
+		NCadeiras < CurC.
+diasNaoRemoviveis(Horario, HorarioExp, NCadeiras, [C | Cs], CurC):-
+		NCadeiras >= CurC,
+		NexC is CurC + 1,
+		findall(_,member(CurC, HorarioExp), Tmp),
+		length(Tmp, Length),
+		determinarDia(Horario, CurC, C, Length),
+		diasNaoRemoviveis(Horario, HorarioExp, NCadeiras, Cs, NexC).
 
+		
+diaSemAulas(Horario, MediaTpc, NCadeiras, DiaOff):-
+	comprimentoDias(Horario, Horario2),
+	calcMedia(Horario, MediaTpc, HorarioM),
+	unirDias(Horario, Juncao),
+	diasNaoRemoviveis(Horario, Juncao, NCadeiras, CadeirasSoltas, 1),
+	samsort(@=<,CadeirasSoltas, NaoRemover),!,
+	length(Tmp1, 1),
+	domain(Tmp1, 1, 5),
+	element(1, Tmp1, DiaOff),
+	element(DiaOff,NaoRemover,Elem),
+	Elem #= 69, %69 indica que pode remover
+	element(DiaOff, Horario2, Length),
+	element(DiaOff, HorarioM, Media),
+	Pontuacao #= Media * Length,
+	labeling([minimize(Pontuacao)], Tmp1).
 
 totalAulasCadeira([],_,Soma):- Soma is 0.
 totalAulasCadeira([Dia1 | Resto], Cadeira, Soma):-
@@ -152,50 +244,41 @@ tpcCadeira([C1 | Cr], [Tt | Tr], [C1 | Resto]):-
 %tpc diario
 verificarTPCD([],[]).
 verificarTPCD([Dia | Resto], [TPCd | TPCr]):-
-	length(Dia, Length),%ter outro array com pushs da posicao dos 1, dp fazer um count para ver quantos é que tem, sendo esse count limitado
+	length(Dia, Length),
 	length(Tmp, Length),
 	domain(Tmp, 0, 1),
 	count(1,Tmp,#=<,2),% max 2 tpc diario
-	%sum(Tmp,#=,Max),
-	labeling([down, all], Tmp), %ta aqui o problema xD
+	sum(Dia,#=,Sum),
+	sum(Tmp,#=<,Sum),
+	labeling([down, all], Tmp), 
 	tpcCadeira(Dia, Tmp, TPCd),
 	verificarTPCD(Resto, TPCr).
 
-cleanDay(Day, Length):-
-	length(Day, Length),
-	maplist(=(0), Day).% wow
 
-removeDayOff([], [], _, _).
-removeDayOff([Old | Or], [New | Nr], Day, CurD):-
-	Day == CurD,
-	length(Old, Length),
-	cleanDay(New,Length),
-	NexD is CurD + 1,
-	removeDayOff(Or, Nr, Day, NexD).
-removeDayOff([Old | Or], [Old | Nr], Day, CurD):-
-	Day \= CurD,
-	NexD is CurD + 1,
-	removeDayOff(Or, Nr, Day, NexD).
+updateMissingTPC([], _, [], _).
+updateMissingTPC([L | Ls], Tpc, [N | Ns], CurC):-
+	count(CurC, Tpc, #=<, L),
+	findall(_, member(CurC, Tpc), Tmp),
+	length(Tmp, Length),
+	N is L - Length,
+	NexC is CurC + 1,
+	updateMissingTPC(Ls, Tpc, Ns, NexC).
 
 %tpc semanal
-verificarTPCS(NumSemanas , _, _, [], NSemana):- NumSemanas =< NSemana.
-verificarTPCS(NumSemanas, Horario, NoClass, [TPC1 | Resto], NSemana):-
+verificarTPCS(NumSemanas, NSemana, _, _, []):- NumSemanas =< NSemana.
+verificarTPCS(NumSemanas, NSemana, Horario, ExpectTPC, [TPC1 | Resto]):-
 	NumSemanas > NSemana,
-	verificarTPCD(Horario, Tmp1),
-	removeDayOff(Tmp1, TPC1, NoClass, 0),
+	verificarTPCD(Horario, TPC1), %fazer somatorio com restriçoes e fazer para garantir que todos teem tpc
+	unirDias(TPC1, Juncao),
+	updateMissingTPC(ExpectTPC, Juncao, Update, 1),
 	NextS is NSemana + 1,
-	verificarTPCS(NumSemanas, Horario, NoClass, Resto, NextS).
+	verificarTPCS(NumSemanas, NextS, Horario, Update, Resto).
 
-verificarTotalTPC(_, _, []).
-verificarTotalTPC(CurC, Tpc, [T1 | Tr]):-
-	count(CurC,Tpc,#=<,T1),
-	NexC is CurC + 1,
-	verificarTotalTPC(NexC, Tpc, Tr).
 
 verificarTPC(NumSemanas, Horario, NCadeiras):-
 	totalCadeiras(NumSemanas, Horario, NCadeiras, 1, TotalC),!,
-	random(0, 5, NoClass),
-	verificarTPCS(NumSemanas, Horario, NoClass, TPC, 0),
-	unirDias(TPC, Juncao),
-	%verificarTotalTPC(1, Juncao, TotalC),
+	diaSemAulas(Horario, TotalC, NCadeiras, DiaOff),
+	removeDayOff(Horario, NewHorario, DiaOff, 1),
+	verificarTPCS(NumSemanas, 0, NewHorario, TotalC, TPC),
 	imprimeTPC(TPC).
+
