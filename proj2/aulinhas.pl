@@ -2,9 +2,6 @@
 :- use_module(library(lists)).
 :- use_module(library(random)).
 
-divideLista(L, T):-
-		sublist(L,T,3,_,0).
-
 somaNnumeros(Start, End, Soma):-
 	Start >= End,
 	Soma is Start, !.
@@ -29,10 +26,10 @@ verificaTestesAno(NumSemanas, Disciplinas, Horario):-
     NumDiasSemTeste is (NumDias - NumTestes),
     count(0, Calendario, #=, NumDiasSemTeste),
 		divisaoDosTestes(Calendario, TestesInt, TestesFin),
+		verificaTestesDiferentes(TestesInt, NumDisciplinas, 1),
     verificaTestesTodasSemanas(TestesInt, Horario),
-    verificaTestesDiferentes(TestesInt, NumDisciplinas, 1),
-		verificaTestesTodasSemanas(TestesFin, Horario),
     verificaTestesDiferentes(TestesFin, NumDisciplinas, 1),
+		verificaTestesTodasSemanas(TestesFin, Horario),
     labeling([], Calendario),
     imprimeCalendario(Calendario),
     labeling([], Disciplinas).
@@ -62,7 +59,8 @@ verificaTestesTodasSemanas([Dia1, Dia2, Dia3, Dia4, Dia5  | Resto], Horario):-
 verificaDisciplinasNoDia([],[]).
 verificaDisciplinasNoDia([Teste | Outros], [Dia | Resto]):-
 		append(Dia, [0], Ver),
-		count(Teste, Ver, #=, 1),
+		Teste #= Var,
+		member(Var, Ver),
 		verificaDisciplinasNoDia(Outros, Resto).
 
 verificaTestesMesmaSemana(Dias):-
