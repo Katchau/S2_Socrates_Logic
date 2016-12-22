@@ -1,47 +1,51 @@
 :- use_module(library(clpfd)).
-:- use_module(library(lists)).
 :- use_module(library(random)).
+:-include('calendario.pl').
 
-somaNnumeros(Start, End, Soma):-
-	Start >= End,
-	Soma is Start.
-somaNnumeros(Start, End, Soma):-
-		Start \= End,
-		Next = Start + 1,
-		somaNnumeros(Next, End, Soma1),
-		Soma is Soma1 + Start.
+% anoEscolar(Horario, NumSemanas, NumDisciplinas):-
+	% verificaTestesAno(NumSemanas, NumDisciplinas, )
+
+
+
+
 
 criaCalendario(NumSemanas, Calendario):-
     NumDias is (NumSemanas * 5),
     length(Calendario, NumDias).
 
-verificaTestesAno(NumSemanas, Disciplinas, Horario):-
-    length(Disciplinas, NumDisciplinas),
-		NumTestes is (NumDisciplinas * 2),
+verificaTestesAno(NumSemanas, NumDisciplinas, Horario):-
+	NumTestes is (NumDisciplinas * 2),
     criaCalendario(NumSemanas, Calendario),
     length(Calendario, NumDias),
-    domain(Disciplinas,0,2),
     domain(Calendario,0,NumDisciplinas),
-		sum(Disciplinas, #=, NumTestes),
     NumDiasSemTeste is (NumDias - NumTestes),
     count(0, Calendario, #=, NumDiasSemTeste),
-		divisaoDosTestes(Calendario, TestesInt, TestesFin),
-		verificaTestesDiferentes(TestesInt, NumDisciplinas, 1),
+	divisaoDosTestes(Calendario, NumDisciplinas, TestesInt, TestesFin),
+	verificaTestesDiferentes(TestesInt, NumDisciplinas, 1),
     verificaTestesTodasSemanas(TestesInt, Horario),
     verificaTestesDiferentes(TestesFin, NumDisciplinas, 1),
-		verificaTestesTodasSemanas(TestesFin, Horario),
-    labeling([], Calendario),
-    imprimeCalendario(Calendario),
-    labeling([], Disciplinas).
-
-divisaoDosTestes(Calendario, TestesInt, TestesFin):-
-		length(Calendario, Tam),
-		T is div(Tam, 5),
-		Tamanho is div(T, 2),
-		TFin is Tamanho * 5,
-		sublist(Calendario, TestesFin,TFin,_,0),
-		TInt is Tam - TFin,
-		sublist(Calendario, TestesInt,0,_,TInt).
+	verificaTestesTodasSemanas(TestesFin, Horario),
+    labeling([middle, down], Calendario),
+    imprimeTestes(Calendario).
+	
+	
+divisaoDosTestes(Calendario, NTestes, TestesInt, TestesFin):-
+	length(Calendario, Tam),
+	T is div(Tam, 5),
+	Tamanho is div(T, 2),
+	TFin is Tamanho * 5,
+	sublist(Calendario, TestesFin,TFin,_,0),
+	TInt is Tam - TFin,
+	sublist(Calendario, TestesInt,0,_,TInt),
+	Tmp1 is NTestes * 0.5,
+	TTestF is round(Tmp1) * 5,
+	sublist(TestesFin, TestF,0,_,TTestF),
+	sum(TestF,#=,0),
+	Tmp2 is NTestes * 0.5,
+	TTestI is round(Tmp2) * 5,
+	sublist(TestesInt, TestI,0,_,TTestI),
+	sum(TestI,#=,0).
+	
 
 verificaTestesDiferentes(Calendario, NumTestes, Teste):-
     Teste =< NumTestes,
@@ -58,10 +62,10 @@ verificaTestesTodasSemanas([Dia1, Dia2, Dia3, Dia4, Dia5  | Resto], Horario):-
 
 verificaDisciplinasNoDia([],[]).
 verificaDisciplinasNoDia([Teste | Outros], [Dia | Resto]):-
-		append(Dia, [0], Ver),
-		Teste #= Var,
-		member(Var, Ver),
-		verificaDisciplinasNoDia(Outros, Resto).
+	append(Dia, [0], Ver),
+	Teste #= Var,
+	member(Var, Ver),
+	verificaDisciplinasNoDia(Outros, Resto).
 
 verificaTestesMesmaSemana(Dias):-
     count(0, Dias, #>= ,3),
@@ -96,14 +100,14 @@ verificarDias(Horario, NDisciplinas):-
 	verificarAulas(Total, NDisciplinas, 1).
 
 criarDia(_, [], DS):- DS == 6 . %fim de semana. que bom
-  criarDia(Disciplinas, [Dia | Resto], DS):-
-  DS \= 6,
-  length(Dia, Disciplinas),
-  domain(Dia, 0, Disciplinas),
-  all_distinct(Dia),
-  Prox is DS+ 1,
-  labeling([], Dia),
-  criarDia(Disciplinas, Resto, Prox).
+	criarDia(Disciplinas, [Dia | Resto], DS):-
+	DS \= 6,
+	length(Dia, Disciplinas),
+	domain(Dia, 0, Disciplinas),
+	all_distinct(Dia),
+	Prox is DS+ 1,
+	labeling([down, all], Dia),
+	criarDia(Disciplinas, Resto, Prox).
 
 deleteZeros([],[]).
 deleteZeros([L1 | Ls], [R1 | Rs]):-
@@ -115,6 +119,7 @@ criarHorario(Disciplinas, Horario):-
 	criarDia(Disciplinas, Temp, 1),
 	deleteZeros(Temp, Horario),
 	verificarDias(Horario, Disciplinas).
+
 
 totalAulasCadeira([],_,Soma):- Soma is 0.
 totalAulasCadeira([Dia1 | Resto], Cadeira, Soma):-
@@ -135,17 +140,6 @@ totalCadeiras(NumSemanas, Horario, NCadeiras, CurC, [T1 | Tr]):-
 	NexC is CurC + 1,
 	totalCadeiras(NumSemanas, Horario, NCadeiras, NexC, Tr),!.
 
-
-% verificarTPCD([],[]).
-% verificarTPCD([Dia | Resto], [TPCd | TPCr]):-
-	% length(Dia, Length),%ter outro array com pushs da posicao dos 1, dp fazer um count para ver quantos é que tem, sendo esse count limitado
-	% length(TPCd, Length),
-	% domain(TPCd, 0, 1),
-	% count(1,TPCd,#=<,2),% max 2 tpc diario
-	% sum(TPCd,#=,Max),
-	% labeling([maximize(Max)], TPCd),
-	% verificarTPCD(Resto, TPCr).
-
 tpcCadeira([],[],[]).
 tpcCadeira([_ | Cr], [Tt | Tr], [Tt | Resto]):-
 	Tt == 0,
@@ -162,8 +156,8 @@ verificarTPCD([Dia | Resto], [TPCd | TPCr]):-
 	length(Tmp, Length),
 	domain(Tmp, 0, 1),
 	count(1,Tmp,#=<,2),% max 2 tpc diario
-	sum(Tmp,#=,Max),
-	labeling([], Tmp), %ta aqui o problema xD
+	%sum(Tmp,#=,Max),
+	labeling([down, all], Tmp), %ta aqui o problema xD
 	tpcCadeira(Dia, Tmp, TPCd),
 	verificarTPCD(Resto, TPCr).
 
@@ -198,14 +192,11 @@ verificarTotalTPC(CurC, Tpc, [T1 | Tr]):-
 	NexC is CurC + 1,
 	verificarTotalTPC(NexC, Tpc, Tr).
 
-verificarTPC(NumSemanas, Horario, NCadeiras, TPC):-
+verificarTPC(NumSemanas, Horario, NCadeiras):-
 	totalCadeiras(NumSemanas, Horario, NCadeiras, 1, TotalC),!,
 	random(0, 5, NoClass),
 	verificarTPCS(NumSemanas, Horario, NoClass, TPC, 0),
 	unirDias(TPC, Juncao),
-	verificarTotalTPC(1, Juncao, TotalC).
+	%verificarTotalTPC(1, Juncao, TotalC),
+	imprimeTPC(TPC).
 
-imprimeCalendario([]).
-imprimeCalendario([Segunda, Terca, Quarta, Quinta, Sexta | Resto]):-
-    format("Segunda:~w Terca:~w Quarta:~w Quinta:~w Sexta:~w ~n",[Segunda, Terca, Quarta, Quinta, Sexta]),
-    imprimeCalendario(Resto).
