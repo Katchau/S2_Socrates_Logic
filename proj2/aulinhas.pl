@@ -26,9 +26,9 @@ verificaTestesAno(NumSemanas, NumDisciplinas, Horario):-
     verificaTestesDiferentes(TestesFin, NumDisciplinas, 1),
 	verificaTestesTodasSemanas(TestesFin, Horario),
     labeling([middle, down], Calendario),
-    imprimeTestes(Calendario).
-	
-	
+    imprimeCalendarioTestes(Calendario).
+
+
 divisaoDosTestes(Calendario, NTestes, TestesInt, TestesFin):-
 	length(Calendario, Tam),
 	T is div(Tam, 5),
@@ -45,7 +45,7 @@ divisaoDosTestes(Calendario, NTestes, TestesInt, TestesFin):-
 	TTestI is round(Tmp2) * 5,
 	sublist(TestesInt, TestI,0,_,TTestI),
 	sum(TestI,#=,0).
-	
+
 
 verificaTestesDiferentes(Calendario, NumTestes, Teste):-
     Teste =< NumTestes,
@@ -199,4 +199,3 @@ verificarTPC(NumSemanas, Horario, NCadeiras):-
 	unirDias(TPC, Juncao),
 	%verificarTotalTPC(1, Juncao, TotalC),
 	imprimeTPC(TPC).
-
