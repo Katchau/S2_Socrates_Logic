@@ -13,7 +13,7 @@ criaCalendario(NumSemanas, Calendario):-
     NumDias is (NumSemanas * 5),
     length(Calendario, NumDias).
 
-verificaTestesAno(NumSemanas, NumDisciplinas, Horario):-
+verificaTestesAno(NumSemanas, NumDisciplinas, Horario, Calendario):-
 	NumTestes is (NumDisciplinas * 2),
     criaCalendario(NumSemanas, Calendario),
     length(Calendario, NumDias),
@@ -25,8 +25,8 @@ verificaTestesAno(NumSemanas, NumDisciplinas, Horario):-
     verificaTestesTodasSemanas(TestesInt, Horario),
     verificaTestesDiferentes(TestesFin, NumDisciplinas, 1),
 	verificaTestesTodasSemanas(TestesFin, Horario),
-    labeling([middle, down], Calendario),
-    imprimeCalendarioTestes(Calendario).
+    labeling([middle, down], Calendario).
+    %imprimeCalendarioTestes(Calendario).
 
 
 divisaoDosTestes(Calendario, NTestes, TestesInt, TestesFin):-

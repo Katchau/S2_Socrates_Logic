@@ -23,13 +23,22 @@ traduzDiaSemana(3,'Quarta ').
 traduzDiaSemana(4,'Quinta ').
 traduzDiaSemana(5,'Sexta  ').
 
+imprimeTurmas([], [], _).
+imprimeTurmas([[Testes, TPC] | Resto], [Horario | Seguinte], Turma):-
+    nl,
+    format("---------------------------------------------------Turma~d------------------------------------------------------~n", [Turma]),
+    imprimeTurmaHorario(Horario),
+    imprimeCalendarioTestes(Testes),
+    %imprimeCalendarioTPC(TPC),
+    TurmaSeguinte is Turma + 1,
+    imprimeTurmas(Resto, Seguinte, TurmaSeguinte).
 
 imprimeTurmaHorario(Horario):-
-    write('Horario:'),nl,
+    nl, write('Horario:'),nl,
     imprimeHorario(Horario, 1),
     write('').
 
-imprimeHorario([],_).
+imprimeHorario([],_):- nl.
 imprimeHorario([Dia | Resto], DiaS):-
     traduzDiaSemana(DiaS, DiaSemana),
     format(" ~w:", [DiaSemana]),
@@ -46,9 +55,8 @@ imprimeDia([Disciplina | Resto]):-
     imprimeDia(Resto).
 
 imprimeCalendarioTestes(CalendarioTestes):-
-    write(' ___________________________________________________Testes:_________________________________________________________ '), nl,
-    imprimeTestes(CalendarioTestes),
-    write(' ___________________________________________________________________________________________________________________ ').
+    write('Testes:'), nl,
+    imprimeTestes(CalendarioTestes), nl.
 
 imprimeTestes([]).
 imprimeTestes([Segunda, Terca, Quarta, Quinta, Sexta | Resto]):-
@@ -57,7 +65,7 @@ imprimeTestes([Segunda, Terca, Quarta, Quinta, Sexta | Resto]):-
     traduzDisciplina(Quarta, Qua),
     traduzDisciplina(Quinta, Qui),
     traduzDisciplina(Sexta, Sex),
-    format("| Segunda: ~w Terca: ~w Quarta: ~w Quinta: ~w Sexta: ~w |~n",[Seg, Ter, Qua, Qui, Sex]),
+    format(" Segunda: ~w Terca: ~w Quarta: ~w Quinta: ~w Sexta: ~w ~n",[Seg, Ter, Qua, Qui, Sex]),
     imprimeTestes(Resto).
 
 imprimeCalendarioTPC(CalendarioTPC):-

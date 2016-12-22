@@ -1,45 +1,47 @@
-%Todos os patinhos sabem bem nadar 
-%Sabem bem nadar 
-%Cabeça para baixo, rabinho para o ar 
-%Cabeça para baixo, rabinho para o ar 
-%
-%Quando estão cansados da água vão sair 
-%Da água vão sair 
-%Depois em grande fila, para o ninho querem ir 
-%Depois em grande fila, para o ninho querem ir
-load_lib:- use_module(library(clpfd)), use_module(library(lists)).
+:-include('aulinhas.pl').
 
-inicializarDia(Dia, N):-
-	Length in 0..N,
-	length(Dia, Length),
-	domain(Dia, 1, N),
-	all_distinct(Dia),
-	labeling([],[Length]),
-	labeling([], Dia).
-	
-exp(A,B,C):-
-	domain([A,B,C],1,3), X in 2..5,
-	count(1,[A,B,C],#=,X), labeling([],[X]).
+run:-
+		anoEscolar(2,
+								[
+									[[1,2], [3,5], [1,5], [2,3], [1,4]],
+									[[1,3], [4,2], [5,1], [2,3], [4,2]]
+								],
+								5, 10).
 
-unirDias([], []).
-unirDias([Dia | Ndias], Juncao):-
-	unirDias(Dia, D1),
-    unirDias(Ndias, D2),
-    append(D1, D2, Juncao),
-	!.
-unirDias(D, [D]). 
+anoEscolar(NumTurmas, Horarios, NumDisciplinas, NumSemanas):-
+		NumDisciplinas =< 7,
+		length(Turmas, NumTurmas),
+		arranjaTurma(Horarios, NumDisciplinas, NumSemanas, Turmas),
+		%verificaTestesProximos(Turmas, NumDisciplinas),
+		imprimeTurmas(Turmas, Horarios, 1).
 
-verificarAulas(_, NDisciplinas, Disc):-
-NDisciplinas == Disc.
-verificarAulas(Total, NDisciplinas, Disc):-
-	NDisciplinas \= Disc,
-	count(Disc, Total, #>=, 1),
-	count(Disc, Total, #=<, 4),
-	Disc2 is Disc + 1,
-	verificarAulas(Total, NDisciplinas, Disc2).
+arranjaTurma([], _, _, []).
+arranjaTurma([Horario | RestantesTurmas], NumDisciplinas, NumSemanas, [[Testes, TPC] | Resto]):-
+		verificaTestesAno(NumSemanas, NumDisciplinas, Horario, Testes), !,
+		%verificarTPC(NumSemanas, Horario, NumDisciplinas, TPC),
+		arranjaTurma(RestantesTurmas, NumDisciplinas, NumSemanas, Resto).
 
-verificarDias(Horario, NDisciplinas):-
-	unirDias(Horario, Total),
-	nvalue(NDisciplinas, Total),
-	verificarAulas(Total, NDisciplinas, 1).
-	
+verificaTurmaA2(Turma1, Turma2, Teste, NumDisciplinas):-
+		Teste =< NumDisciplinas,
+		nth0(T1, Turma1, Teste),
+		nth0(T2, Turma2, Teste),
+		T1 >= T2,
+		Ti is (0 - T2),
+		sum([T1, Ti], =<, 10),
+		TesteSeguinte is (Teste + 1),
+		verificaTurmaA2(Turma1, Turma2, TesteSeguinte, NumDisciplinas).
+verificaTurmaA2(Turma1, Turma2, Teste, NumDisciplinas):-
+		Teste =< NumDisciplinas,
+		nth0(T1, Turma1, Teste),
+		nth0(T2, Turma2, Teste),
+		T1 < T2,
+		Ti is (0 - T1),
+		sum([Ti, T2], =<, 10),
+		TesteSeguinte is (Teste + 1),
+		verificaTurmaA2(Turma1, Turma2, TesteSeguinte, NumDisciplinas).
+verificaTurmaA2(_,_,_,_).
+
+
+verificaTestesProximos([[TestesTurma1, _] | [[TestesTurma2, _] | Resto]], NumDisciplinas):-
+		verificaTurmaA2(TestesTurma1, TestesTurma2, 1, NumDisciplinas),
+		verificaTestesProximos([[TestesTurma2, _] | Resto], NumDisciplinas).
