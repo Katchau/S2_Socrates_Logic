@@ -3,10 +3,49 @@
 :- use_module(library(samsort)).
 :-include('calendario.pl').
 
-% anoEscolar(Horario, NumSemanas, NumDisciplinas):-
-	% verificaTestesAno(NumSemanas, NumDisciplinas, )
+%predicado para a criacao de um ano escolar
+anoEscolar(NumTurmas, Horarios, NumDisciplinas, NumSemanas, MaxTPC):-
+		NumDisciplinas =< 7, %todo
+		length(Turmas, NumTurmas),
+		arranjaTurma(Horarios, NumDisciplinas, NumSemanas, Turmas, MaxTPC),
+		%verificaTestesProximos(Turmas, NumDisciplinas),
+		imprimeTurmas(Turmas, Horarios, 1).
 
+%para cada turma vai construir o seu mapa de testes e de tpc
+arranjaTurma([], _, _, [],_).
+arranjaTurma([Horario | RestantesTurmas], NumDisciplinas, NumSemanas, [[Testes, TPC] | Resto], MaxTPC):-
+		verificarDias(Horario, NumDisciplinas),
+		verificaTestesAno(NumSemanas, NumDisciplinas, Horario, Testes), !,
+		verificarTPC(NumSemanas, Horario, NumDisciplinas, MaxTPC, TPC), !,
+		arranjaTurma(RestantesTurmas, NumDisciplinas, NumSemanas, Resto, MaxTPC).
 
+%predicado que restringe a distancia entre testes iguais para 2 turmas diferentes, Não está a funcionar
+verificaTurmaA2(Turma1, Turma2, Teste, NumDisciplinas):-
+		Teste =< NumDisciplinas,
+		nth0(T1, Turma1, Teste),
+		nth0(T2, Turma2, Teste),
+		T1 >= T2,
+		Ti is (0 - T2),
+		sum([T1, Ti], =<, 10),
+		TesteSeguinte is (Teste + 1),
+		verificaTurmaA2(Turma1, Turma2, TesteSeguinte, NumDisciplinas).
+verificaTurmaA2(Turma1, Turma2, Teste, NumDisciplinas):-
+		Teste =< NumDisciplinas,
+		nth0(T1, Turma1, Teste),
+		nth0(T2, Turma2, Teste),
+		T1 < T2,
+		Ti is (0 - T1),
+		sum([Ti, T2], =<, 10),
+		TesteSeguinte is (Teste + 1),
+		verificaTurmaA2(Turma1, Turma2, TesteSeguinte, NumDisciplinas).
+verificaTurmaA2(_,_,_,_).
+
+%predicado que juntamente com o de cima vai restringir a distancia de testes iguais em turmas diferentes
+verificaTestesProximos([[TestesTurma1, _] | [[TestesTurma2, _] | Resto]], NumDisciplinas):-
+		verificaTurmaA2(TestesTurma1, TestesTurma2, 1, NumDisciplinas),
+		verificaTestesProximos([[TestesTurma2, _] | Resto], NumDisciplinas).
+
+%predicado que une os dias de um calendario
 unirDias([], []).
 unirDias([Dia | Ndias], Juncao):-
 	unirDias(Dia, D1),
@@ -15,6 +54,7 @@ unirDias([Dia | Ndias], Juncao):-
 	!.
 unirDias(D, [D]).
 
+%predicado que restringe o numero de aulas por semana
 verificarAulas(_, NDisciplinas, Disc):-
 NDisciplinas < Disc.
 verificarAulas(Total, NDisciplinas, Disc):-
@@ -24,17 +64,20 @@ verificarAulas(Total, NDisciplinas, Disc):-
 	Disc2 is Disc + 1,
 	verificarAulas(Total, NDisciplinas, Disc2).
 
+%predicado que restringe a que as aulas nao sejam repetidas
 verificarAulasRepetidas([]).
 verificarAulasRepetidas([Dia | Resto]):-
 	all_distinct(Dia),
 	verificarAulasRepetidas(Resto).
 
+%predicado que verifica as aulas por dia
 verificarDias(Horario, NDisciplinas):-
 	unirDias(Horario, Total),
 	verificarAulasRepetidas(Horario),
 	nvalue(NDisciplinas, Total),
 	verificarAulas(Total, NDisciplinas, 1).
 
+%predicado que ira criar o dia para o horario
 criarDia(_, [], DS):- DS == 6 . %fim de semana. que bom
 criarDia(Disciplinas, [Dia | Resto], DS):-
 	DS \= 6,
@@ -45,13 +88,14 @@ criarDia(Disciplinas, [Dia | Resto], DS):-
 	labeling([down, all], Dia),
 	criarDia(Disciplinas, Resto, Prox).
 
+%
 contagemNumeros(_, [], _).
 contagemNumeros(Dia, [O | Or],CurC):-
 	count(CurC, Dia, #=<, O),
 	NexC is CurC + 1,
 	contagemNumeros(Dia, Or, NexC).
-	
-	
+
+%Inicializa os dias
 inicializarDias(_, [], _,_).
 inicializarDias(NDis, [Dia | Prox],NumCadeiras, CurC):-
 	length(Dia, NDis),
@@ -62,6 +106,7 @@ inicializarDias(NDis, [Dia | Prox],NumCadeiras, CurC):-
 	labeling([down, all], Dia),
 	inicializarDias(NDis, Prox, NumCadeiras, New).
 
+%
 criarHorario2(Disciplinas, Horario):-
 	length(Horario,5), % 5 dias da semana
 	length(NumCadeiras, Disciplinas),
@@ -69,6 +114,7 @@ criarHorario2(Disciplinas, Horario):-
 	labeling([down, all], NumCadeiras),
 	inicializarDias(Disciplinas, Horario, NumCadeiras, []).
 
+%predicado que remove os zeros de uma determinada lista
 deleteZeros([],[]).
 deleteZeros([L1 | Ls], [R1 | Rs]):-
  	delete(L1, 0, R1),
@@ -80,11 +126,12 @@ criarHorario(Disciplinas, Horario):-
 	deleteZeros(Temp, Horario),
 	verificarDias(Horario, Disciplinas).
 
-
+%predicado que apartir do numero de semanas cria uma lista com todos os dias dessas semanas
 criaCalendario(NumSemanas, Calendario):-
     NumDias is (NumSemanas * 5),
     length(Calendario, NumDias).
 
+%predicado que vai criar o mapa de testes para uma determinada turma
 verificaTestesAno(NumSemanas, NumDisciplinas, Horario, Calendario):-
 	NumTestes is (NumDisciplinas * 2),
     criaCalendario(NumSemanas, Calendario),
@@ -99,8 +146,8 @@ verificaTestesAno(NumSemanas, NumDisciplinas, Horario, Calendario):-
 	verificaTestesTodasSemanas(TestesFin, Horario),
     labeling([middle, down], Calendario).
     %imprimeCalendarioTestes(Calendario).
-	
-	
+
+%predicado que vai dividir a lista de testes em duas para a cracao dos testes
 divisaoDosTestes(Calendario, NTestes, TestesInt, TestesFin):-
 	length(Calendario, Tam),
 	T is div(Tam, 5),
@@ -117,8 +164,8 @@ divisaoDosTestes(Calendario, NTestes, TestesInt, TestesFin):-
 	TTestI is round(Tmp2) * 5,
 	sublist(TestesInt, TestI,0,_,TTestI),
 	sum(TestI,#=,0).
-	
 
+%predicado que restringe os testes numa determinada lista para que sejam todos diferentes
 verificaTestesDiferentes(Calendario, NumTestes, Teste):-
     Teste =< NumTestes,
     count(Teste, Calendario, #=, 1),
@@ -126,12 +173,14 @@ verificaTestesDiferentes(Calendario, NumTestes, Teste):-
     verificaTestesDiferentes(Calendario, NumTestes, TesteSeguinte).
 verificaTestesDiferentes(_,_,_).
 
+%predicado que verifica todas as restricoes dos testes por semana
 verificaTestesTodasSemanas([], _).
 verificaTestesTodasSemanas([Dia1, Dia2, Dia3, Dia4, Dia5  | Resto], Horario):-
     verificaTestesMesmaSemana([Dia1, Dia2, Dia3, Dia4, Dia5]),
 		verificaDisciplinasNoDia([Dia1, Dia2, Dia3, Dia4, Dia5], Horario),
     verificaTestesTodasSemanas(Resto, Horario).
 
+%predicado que restringe o teste desse dia a uma disciplina ou a nenhum teste
 verificaDisciplinasNoDia([],[]).
 verificaDisciplinasNoDia([Teste | Outros], [Dia | Resto]):-
 	append(Dia, [0], Ver),
@@ -139,19 +188,23 @@ verificaDisciplinasNoDia([Teste | Outros], [Dia | Resto]):-
 	member(Var, Ver),
 	verificaDisciplinasNoDia(Outros, Resto).
 
+%predicado que restringe o numero de dias de teste a um maximo de 2 por semana
 verificaTestesMesmaSemana(Dias):-
     count(0, Dias, #>= ,3),
     verfificaTestesDiasConsecutivos(Dias).
 
+%predicado que restringe a que nao haja testes em dias consecutivos
 verfificaTestesDiasConsecutivos([_]).
 verfificaTestesDiasConsecutivos([Dia1 | [Dia2 | Resto]]):-
     count(0,[Dia1, Dia2], #>=, 1),
     verfificaTestesDiasConsecutivos([Dia2 | Resto]).
 
+%
 cleanDay(Day, Length):-
 	length(Day, Length),
-	maplist(=(0), Day).% wow
+	maplist(=(0), Day).
 
+%
 removeDayOff([], [], _, _).
 removeDayOff([Old | Or], [New | Nr], Day, CurD):-
 	Day == CurD,
@@ -164,10 +217,12 @@ removeDayOff([Old | Or], [Old | Nr], Day, CurD):-
 	NexD is CurD + 1,
 	removeDayOff(Or, Nr, Day, NexD).
 
+%predicado que define o comprimento dos dias mediante o horario
 comprimentoDias([], []).
 comprimentoDias([D1 | Dr], [L | Ls]):-
 	length(D1, L),
 	comprimentoDias(Dr, Ls).
+
 
 calcMediaDia([],_,[]).
 calcMediaDia([0 | Dr], MediaTotal, [0 | Mr]):-
@@ -185,7 +240,7 @@ calcMedia([D1 | Dr], MediaTotal, [M1 | Mr]):-
 verificarMembroDia(Horario, Dia, Elemento):-
 	nth1(Dia, Horario, ArrayDia),
 	member(Elemento, ArrayDia).
-	
+
 determinarDia(_, _, 69, Elems):-
 	Elems > 1.
 determinarDia(Horario, CurC, Dia, Elems):-
@@ -202,7 +257,7 @@ diasNaoRemoviveis(Horario, HorarioExp, NCadeiras, [C | Cs], CurC):-
 		determinarDia(Horario, CurC, C, Length),
 		diasNaoRemoviveis(Horario, HorarioExp, NCadeiras, Cs, NexC).
 
-		
+
 diaSemAulas(Horario, MediaTpc, NCadeiras, DiaOff):-
 	comprimentoDias(Horario, Horario2),
 	calcMedia(Horario, MediaTpc, HorarioM),
@@ -256,7 +311,7 @@ verificarTPCD([Dia | Resto], [TPCd | TPCr], NMax):-
 	count(1,Tmp,#=<,NMax),% max 2 tpc diario
 	sum(Dia,#=,Sum),
 	sum(Tmp,#=<,Sum),
-	labeling([down, all], Tmp), 
+	labeling([down, all], Tmp),
 	tpcCadeira(Dia, Tmp, TPCd),
 	verificarTPCD(Resto, TPCr, NMax).
 
@@ -280,11 +335,10 @@ verificarTPCS(NumSemanas, NSemana, Horario, ExpectTPC, TPCMax,[TPC1 | Resto]):-
 	NextS is NSemana + 1,
 	verificarTPCS(NumSemanas, NextS, Horario, Update, TPCMax,Resto).
 
-
+%predicado que cria o mapa de  TPC para cada turma
 verificarTPC(NumSemanas, Horario, NCadeiras, TPCMax, TPC):-
 	totalCadeiras(NumSemanas, Horario, NCadeiras, 1, TotalC),!,
 	diaSemAulas(Horario, TotalC, NCadeiras, DiaOff),
 	removeDayOff(Horario, NewHorario, DiaOff, 1),
 	verificarTPCS(NumSemanas, 0, NewHorario, TotalC, TPCMax, TPC).
 	%imprimeTPC(TPC).
-

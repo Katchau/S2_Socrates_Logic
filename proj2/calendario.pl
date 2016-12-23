@@ -86,8 +86,9 @@ imprimeTPC([[Segunda, Terca, Quarta, Quinta, Sexta] | Resto]):-
     imprimeTPCDia(Sexta),nl,
     imprimeTPC(Resto),!.
 
-	
-imprimeTPCDia([0]).
+imprimeTPCDia([]).
+imprimeTPCDia([0]):-
+    write('    ').
 imprimeTPCDia([0 | Resto]):-
     imprimeTPCDia(Resto).
 imprimeTPCDia([Disciplina]):-
