@@ -78,6 +78,7 @@ verificarDias(Horario, NDisciplinas):-
 	verificarAulas(Total, NDisciplinas, 1).
 
 %predicado que ira criar o dia para o horario
+%predicado historico
 criarDia(_, [], DS):- DS == 6 . %fim de semana. que bom
 criarDia(Disciplinas, [Dia | Resto], DS):-
 	DS \= 6,
@@ -85,10 +86,10 @@ criarDia(Disciplinas, [Dia | Resto], DS):-
 	domain(Dia, 0, Disciplinas),
 	all_distinct(Dia),
 	Prox is DS+ 1,
-	labeling([ff, down, all], Dia),
+	labeling([ff, down], Dia),
 	criarDia(Disciplinas, Resto, Prox).
 
-%
+%predicado histórico
 contagemNumeros(_, [], _).
 contagemNumeros(Dia, [O | Or],CurC):-
 	count(CurC, Dia, #=<, O),
@@ -96,6 +97,7 @@ contagemNumeros(Dia, [O | Or],CurC):-
 	contagemNumeros(Dia, Or, NexC).
 
 %Inicializa os dias
+%predicado histórico
 inicializarDias(_, [], _,_).
 inicializarDias(NDis, [Dia | Prox],NumCadeiras, CurC):-
 	length(Dia, NDis),
@@ -103,15 +105,15 @@ inicializarDias(NDis, [Dia | Prox],NumCadeiras, CurC):-
 	all_distinct(Dia),
 	append(CurC, Dia, New),
 	contagemNumeros(New, NumCadeiras, 1),
-	labeling([ff, down, all], Dia),
+	labeling([ff, down], Dia),
 	inicializarDias(NDis, Prox, NumCadeiras, New).
 
-%
+%tentativa de criar o gerador falhada 2.0
 criarHorario2(Disciplinas, Horario):-
 	length(Horario,5), % 5 dias da semana
 	length(NumCadeiras, Disciplinas),
 	domain(NumCadeiras, 1, 4),
-	labeling([ff, down, all], NumCadeiras),
+	labeling([ff, down], NumCadeiras),
 	inicializarDias(Disciplinas, Horario, NumCadeiras, []).
 
 %predicado que remove os zeros de uma determinada lista
@@ -120,7 +122,7 @@ deleteZeros([L1 | Ls], [R1 | Rs]):-
  	delete(L1, 0, R1),
  	deleteZeros(Ls, Rs).
 
-%ainda em protótipo. Dp tem de se dar uns randomzitos
+%ainda em protótipo. tentativa de criar o gerador falhada 1.0
 criarHorario(Disciplinas, Horario):-
 	criarDia(Disciplinas, Temp, 1),
 	deleteZeros(Temp, Horario),
@@ -144,7 +146,7 @@ verificaTestesAno(NumSemanas, NumDisciplinas, Horario, Calendario):-
     verificaTestesTodasSemanas(TestesInt, Horario),
     verificaTestesDiferentes(TestesFin, NumDisciplinas, 1),
 	verificaTestesTodasSemanas(TestesFin, Horario),
-    labeling([ff, middle, down], Calendario).
+    labeling([ff, down], Calendario).
     %imprimeCalendarioTestes(Calendario).
 
 %predicado que vai dividir a lista de testes em duas para a cracao dos testes
@@ -311,7 +313,7 @@ verificarTPCD([Dia | Resto], [TPCd | TPCr], NMax):-
 	count(1,Tmp,#=<,NMax),% max 2 tpc diario
 	sum(Dia,#=,Sum),
 	sum(Tmp,#=<,Sum),
-	labeling([ff, down, all], Tmp),
+	labeling([ff, down], Tmp),
 	tpcCadeira(Dia, Tmp, TPCd),
 	verificarTPCD(Resto, TPCr, NMax).
 
