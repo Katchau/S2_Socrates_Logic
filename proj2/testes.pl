@@ -85,7 +85,7 @@ run:-
       4, 12, 2).
 
 anoEscolarTeste(NumTurmas, Horarios, NumDisciplinas, NumSemanas, MaxTPC):-
-		NumDisciplinas =< 7, %todo
+		NumDisciplinas =< 7, 
 		length(Turmas, NumTurmas),
 		arranjaTurma(Horarios, NumDisciplinas, NumSemanas, Turmas, MaxTPC).
 
@@ -94,4 +94,4 @@ run(NumTurmas, Horarios, NumDisciplinas, NumSemanas, MaxTPC, Num):-
     anoEscolarTeste(NumTurmas, Horarios, NumDisciplinas, NumSemanas, MaxTPC),
     statistics(runtime, [T1|_]),
     T is T1 - T0,
-    format('~d: solve/3 took ~3d sec.~n', [Num, T]).
+    format('~d: anoEscolar took ~3d sec.~n', [Num, T]).
