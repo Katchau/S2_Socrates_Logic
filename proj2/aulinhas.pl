@@ -281,11 +281,10 @@ verificarTPCS(NumSemanas, NSemana, Horario, ExpectTPC, TPCMax,[TPC1 | Resto]):-
 	verificarTPCS(NumSemanas, NextS, Horario, Update, TPCMax,Resto).
 
 
-verificarTPC(NumSemanas, Horario, NCadeiras, TPCMax):-
+verificarTPC(NumSemanas, Horario, NCadeiras, TPCMax, TPC):-
 	totalCadeiras(NumSemanas, Horario, NCadeiras, 1, TotalC),!,
 	diaSemAulas(Horario, TotalC, NCadeiras, DiaOff),
 	removeDayOff(Horario, NewHorario, DiaOff, 1),
-	verificarTPCS(NumSemanas, 0, NewHorario, TotalC, TPCMax, TPC),
-	write(TPC). %todo
+	verificarTPCS(NumSemanas, 0, NewHorario, TotalC, TPCMax, TPC).
 	%imprimeTPC(TPC).
 

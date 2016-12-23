@@ -6,20 +6,21 @@ run:-
 									[[1,2], [3,5], [1,5], [2,3], [1,4]],
 									[[1,3], [4,2], [5,1], [2,3], [4,2]]
 								],
-								5, 10).
+								5, 10, 2).
 
-anoEscolar(NumTurmas, Horarios, NumDisciplinas, NumSemanas):-
-		NumDisciplinas =< 7,
+anoEscolar(NumTurmas, Horarios, NumDisciplinas, NumSemanas, MaxTPC):-
+		NumDisciplinas =< 7, %todo
 		length(Turmas, NumTurmas),
-		arranjaTurma(Horarios, NumDisciplinas, NumSemanas, Turmas),
+		arranjaTurma(Horarios, NumDisciplinas, NumSemanas, Turmas, MaxTPC),
 		%verificaTestesProximos(Turmas, NumDisciplinas),
 		imprimeTurmas(Turmas, Horarios, 1).
 
-arranjaTurma([], _, _, []).
-arranjaTurma([Horario | RestantesTurmas], NumDisciplinas, NumSemanas, [[Testes, TPC] | Resto]):-
+arranjaTurma([], _, _, [],_).
+arranjaTurma([Horario | RestantesTurmas], NumDisciplinas, NumSemanas, [[Testes, TPC] | Resto], MaxTPC):-
+		verificarDias(Horario, NumDisciplinas),
 		verificaTestesAno(NumSemanas, NumDisciplinas, Horario, Testes), !,
-		%verificarTPC(NumSemanas, Horario, NumDisciplinas, TPC),
-		arranjaTurma(RestantesTurmas, NumDisciplinas, NumSemanas, Resto).
+		verificarTPC(NumSemanas, Horario, NumDisciplinas, MaxTPC, TPC), !,
+		arranjaTurma(RestantesTurmas, NumDisciplinas, NumSemanas, Resto, MaxTPC).
 
 verificaTurmaA2(Turma1, Turma2, Teste, NumDisciplinas):-
 		Teste =< NumDisciplinas,

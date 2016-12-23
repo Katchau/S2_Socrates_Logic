@@ -29,7 +29,7 @@ imprimeTurmas([[Testes, TPC] | Resto], [Horario | Seguinte], Turma):-
     format("---------------------------------------------------Turma~d------------------------------------------------------~n", [Turma]),
     imprimeTurmaHorario(Horario),
     imprimeCalendarioTestes(Testes),
-    %imprimeCalendarioTPC(TPC),
+    imprimeCalendarioTPC(TPC),
     TurmaSeguinte is Turma + 1,
     imprimeTurmas(Resto, Seguinte, TurmaSeguinte).
 
@@ -84,8 +84,12 @@ imprimeTPC([[Segunda, Terca, Quarta, Quinta, Sexta] | Resto]):-
     imprimeTPCDia(Quinta),
     write(' Sexta:'),
     imprimeTPCDia(Sexta),nl,
-    imprimeTPC(Resto).
+    imprimeTPC(Resto),!.
 
+	
+imprimeTPCDia([0]).
+imprimeTPCDia([0 | Resto]):-
+    imprimeTPCDia(Resto).
 imprimeTPCDia([Disciplina]):-
     traduzDisciplinaH(Disciplina, Disc),
     format(" ~w    ", [Disc]).
