@@ -248,17 +248,17 @@ tpcCadeira([C1 | Cr], [Tt | Tr], [C1 | Resto]):-
 
 
 %tpc diario
-verificarTPCD([],[]).
-verificarTPCD([Dia | Resto], [TPCd | TPCr]):-
+verificarTPCD([],[], _).
+verificarTPCD([Dia | Resto], [TPCd | TPCr], NMax):-
 	length(Dia, Length),
 	length(Tmp, Length),
 	domain(Tmp, 0, 1),
-	count(1,Tmp,#=<,2),% max 2 tpc diario
+	count(1,Tmp,#=<,NMax),% max 2 tpc diario
 	sum(Dia,#=,Sum),
 	sum(Tmp,#=<,Sum),
 	labeling([down, all], Tmp), 
 	tpcCadeira(Dia, Tmp, TPCd),
-	verificarTPCD(Resto, TPCr).
+	verificarTPCD(Resto, TPCr, NMax).
 
 
 updateMissingTPC([], _, [], _).
@@ -271,21 +271,21 @@ updateMissingTPC([L | Ls], Tpc, [N | Ns], CurC):-
 	updateMissingTPC(Ls, Tpc, Ns, NexC).
 
 %tpc semanal
-verificarTPCS(NumSemanas, NSemana, _, _, []):- NumSemanas =< NSemana.
-verificarTPCS(NumSemanas, NSemana, Horario, ExpectTPC, [TPC1 | Resto]):-
+verificarTPCS(NumSemanas, NSemana, _, _, _,[]):- NumSemanas =< NSemana.
+verificarTPCS(NumSemanas, NSemana, Horario, ExpectTPC, TPCMax,[TPC1 | Resto]):-
 	NumSemanas > NSemana,
-	verificarTPCD(Horario, TPC1), %fazer somatorio com restriçoes e fazer para garantir que todos teem tpc
+	verificarTPCD(Horario, TPC1, TPCMax),
 	unirDias(TPC1, Juncao),
 	updateMissingTPC(ExpectTPC, Juncao, Update, 1),
 	NextS is NSemana + 1,
-	verificarTPCS(NumSemanas, NextS, Horario, Update, Resto).
+	verificarTPCS(NumSemanas, NextS, Horario, Update, TPCMax,Resto).
 
 
-verificarTPC(NumSemanas, Horario, NCadeiras):-
+verificarTPC(NumSemanas, Horario, NCadeiras, TPCMax):-
 	totalCadeiras(NumSemanas, Horario, NCadeiras, 1, TotalC),!,
 	diaSemAulas(Horario, TotalC, NCadeiras, DiaOff),
 	removeDayOff(Horario, NewHorario, DiaOff, 1),
-	verificarTPCS(NumSemanas, 0, NewHorario, TotalC, TPC),
-	write(TPC).
+	verificarTPCS(NumSemanas, 0, NewHorario, TotalC, TPCMax, TPC),
+	write(TPC). %todo
 	%imprimeTPC(TPC).
 
